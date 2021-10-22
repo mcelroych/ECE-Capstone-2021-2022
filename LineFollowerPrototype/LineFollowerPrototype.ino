@@ -21,8 +21,9 @@
 #include <stdint.h>
 
 const uint16_t adcThresh = 0x0320; // Threshold of 800
-const uint8_t fullSpeed = 0xBF;
-const uint8_t halfSpeed = 0x80;
+const uint8_t maxSpeed = 0x7D;
+uint8_t motorASpeed;
+uint8_t motorBSpeed;
 uint8_t adcMux[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
 volatile int ADCvalue[8];
 int adcI;
@@ -31,7 +32,7 @@ int adcI;
 int main() {
 
   init();
-  
+
   // Configure Direction pins for motor driver
   // PA0/Pin22: Left wheel, PA1/Pin23: right wheel
   // 0 = forward, 1 = reverse
@@ -48,6 +49,10 @@ int main() {
   // Select the first input channel on the adcMux
   adcI = 0;
 
+  // Initalize motor speed
+  motorASpeed = 0x00;
+  motorBSpeed = 0x00;
+
   cli();
 
   initPWM();
@@ -57,18 +62,7 @@ int main() {
 
   // Infinite Loop
   for (;;) {
-    if((ADCvalue[2] < adcThresh) && (ADCvalue[4] > adcThresh)){
-      OCR1A = halfSpeed;
-      OCR1B = fullSpeed;
-    }
-    if((ADCvalue[5] < adcThresh) && (ADCvalue[3] > adcThresh)){
-      OCR1A = fullSpeed;
-      OCR1B = halfSpeed;
-    }
-    if((ADCvalue[3] < adcThresh) && (ADCvalue[4] < adcThresh)){
-      OCR1A = fullSpeed;
-      OCR1B = fullSpeed;
-    }
+
   }
   return 0;
 }
@@ -93,8 +87,8 @@ void initPWM() {
   TCCR1B |= 0x08;
 
   // Set the OCRnA registers for a 50% duty cycle
-  OCR1A = fullSpeed;
-  OCR1B = fullSpeed;
+  OCR1A = motorASpeed;
+  OCR1B = motorBSpeed;
 }
 
 // Initalizes ADC Conversions
@@ -142,4 +136,17 @@ ISR(ADC_vect) {
 
   // Set the ADSC bit to start conversion
   ADCSRA |= 0x40;
+}
+
+// Function to gradually increase motor speed
+// to prevent the robot from leaping forward
+void accelerate(uint8_t motorXSpeed) {
+  if (motorXSpeed < maxSpeed)
+    motorXSpeed += 0x05;
+}
+
+// Function to gradually decrease motor speed
+void decelerate(uint8_t motorXSpeed) {
+  if (motorXSpeed >= 0x05)
+    motorXSpeed -= 0x05;
 }
