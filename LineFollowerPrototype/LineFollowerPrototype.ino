@@ -14,22 +14,24 @@
       Ideal Distance 0.125" (1/8")
 
 */
+
 #include <Arduino.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <stdint.h>
 
-const uint8_t fullSpeed = 0x80;
-const uint8_t halfSpeed = 0x40;
 const uint16_t adcThresh = 0x0320; // Threshold of 800
+const uint8_t fullSpeed = 0xBF;
+const uint8_t halfSpeed = 0x80;
 uint8_t adcMux[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
-volatile int ADCvalue[8]; 
+volatile int ADCvalue[8];
 int adcI;
 
 
 int main() {
 
   init();
-
+  
   // Configure Direction pins for motor driver
   // PA0/Pin22: Left wheel, PA1/Pin23: right wheel
   // 0 = forward, 1 = reverse
@@ -38,7 +40,7 @@ int main() {
 
   // Configure PWM outputs
   // PB5/Pin11: OCR1A (Left wheel), PB6/Pin12: OCR1B (Right Wheel)
-  DDRB |= 0x60; // Set PB5 and PB6 as outputs 
+  DDRB |= 0x60; // Set PB5 and PB6 as outputs
 
   // Configure ADC pins on PortF pins
   DDRF &= ~0xFF; // Set PF0 - PF7 as inputs
@@ -46,19 +48,24 @@ int main() {
   // Select the first input channel on the adcMux
   adcI = 0;
 
-  initPWM();
-  initADC(); 
-  
   cli();
 
-  
+  initPWM();
+  initADC();
 
+  sei();
+
+  // Infinite Loop
   for (;;) {
-    if (adcMux[2] < adcThresh)
+    if((ADCvalue[2] < adcThresh) && (ADCvalue[4] > adcThresh)){
       OCR1A = halfSpeed;
-    else if (adcMux[5] < adcThresh)
+      OCR1B = fullSpeed;
+    }
+    if((ADCvalue[5] < adcThresh) && (ADCvalue[3] > adcThresh)){
+      OCR1A = fullSpeed;
       OCR1B = halfSpeed;
-    else if((adcMux[3] < adcThresh) && (adcMux[4] < adcThresh)) {
+    }
+    if((ADCvalue[3] < adcThresh) && (ADCvalue[4] < adcThresh)){
       OCR1A = fullSpeed;
       OCR1B = fullSpeed;
     }
@@ -68,7 +75,7 @@ int main() {
 
 // Initializes PWM on Timer1
 void initPWM() {
-  
+
   // Set all bits in TCCRnX registers to 0
   TCCR1A &= ~0xFF;
   TCCR1B &= ~0xDF;
@@ -87,19 +94,19 @@ void initPWM() {
 
   // Set the OCRnA registers for a 50% duty cycle
   OCR1A = fullSpeed;
-  OCR1B = halfSpeed;
+  OCR1B = fullSpeed;
 }
 
 // Initalizes ADC Conversions
 void initADC() {
-  
+
   // Set all bits in the ADCMUX and ADCSRX Registers to 0
   ADMUX &= ~0xFF;
   ADCSRA &= ~0xFF;
   ADCSRB &= ~0x4F;
 
   // Set the REFSn bits for a reference voltage of AVCC
-  ADMUX|= 0x40;
+  ADMUX |= 0x40;
 
   // Set the ADEN bit to enable ADC conversions
   ADCSRA |= 0x80;
@@ -119,14 +126,14 @@ void initADC() {
 
 // ISR for ADC Completion
 ISR(ADC_vect) {
-  
+
   // Read the ADCvalue
   ADCvalue[adcI] = ADC;
 
-  // Increment adcI 
+  // Increment adcI
   // Prevent it from overflowing
   adcI++;
-  if(adcI > 7)
+  if (adcI > 7)
     adcI = 0;
 
   // Select the next ADC input channel on the mux
