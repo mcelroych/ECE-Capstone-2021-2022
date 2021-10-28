@@ -64,14 +64,14 @@ int main() {
 
   // Infinite Loop
   for (;;) {
-    while (((ADCvalue[3] < adcThresh) || (ADCvalue[4] < adcThresh)) &&
-           ((ADCvalue[0] > adcThresh) && (ADCvalue[7] > adcThresh))) {
+    while (((ADCvalue[3] < adcThresh) || (ADCvalue[4] < adcThresh)) &&   //0XXX 1XX0 or 0XX1 XXX0
+           ((ADCvalue[0] > adcThresh) && (ADCvalue[7] > adcThresh))) {   
       lineStraight();
     }
-    if ((ADCvalue[0] < adcThresh) || (ADCvalue[7] < adcThresh)) {
+    if ((ADCvalue[0] < adcThresh) || (ADCvalue[7] < adcThresh)) {       //1XXX XXXX or XXXX XXX1
       handleCorner();
     }
-    if ((ADCvalue[0] < adcThresh) && (ADCvalue[7] < adcThresh)) {
+    if ((ADCvalue[0] < adcThresh) && (ADCvalue[7] < adcThresh)) {       //1XXX XXX1
       halt();
     }
 
@@ -175,11 +175,11 @@ void halt () {
 // Checks to make sure middle two sensors always sees white
 void lineStraight() {
   changeDir(0x00);
-  if ((ADCvalue[4] > adcThresh)) {
+  if ((ADCvalue[4] > adcThresh)) {          //XXX0 XXXX
     motorASpeed  = decelerate(motorASpeed);
     OCR1A = motorASpeed;
   }
-  else if ((ADCvalue[3] > adcThresh)) {
+  else if ((ADCvalue[3] > adcThresh)) {     //XXXX 0XXX
     motorBSpeed  = decelerate(motorBSpeed);
     OCR1B = motorBSpeed;
   }
@@ -197,7 +197,7 @@ void changeDir(uint8_t dir) {
 }
 void handleCorner() {
   changeDir(0x01);
-  while ((ADCvalue[2] < adcThresh) || (ADCvalue[4] > adcThresh)) {
+  while ((ADCvalue[2] < adcThresh) || (ADCvalue[4] > adcThresh)) {  //XXX1 XXXX or XXXX X1XX
 
   }
 
