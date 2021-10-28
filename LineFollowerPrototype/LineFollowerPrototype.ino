@@ -23,11 +23,11 @@
 #include <math.h>
 
 const uint16_t adcThresh = 0x01F4; // Threshold of 500
-const uint8_t maxSpeed = 190;
+const uint8_t maxSpeed = 75;
 uint8_t motorASpeed;
 uint8_t motorBSpeed;
 uint8_t adcMux[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
-volatile int ADCvalue[8];
+volatile uint8_t ADCvalue;
 int adcI;
 
 
@@ -64,17 +64,17 @@ int main() {
 
   // Infinite Loop
   for (;;) {
-    while (((ADCvalue[3] < adcThresh) || (ADCvalue[4] < adcThresh)) &&   //0XXX 1XX0 or 0XX1 XXX0
-           ((ADCvalue[0] > adcThresh) && (ADCvalue[7] > adcThresh))) {   
-      lineStraight();
-    }
-    if ((ADCvalue[0] < adcThresh) || (ADCvalue[7] < adcThresh)) {       //1XXX XXXX or XXXX XXX1
-      handleCorner();
-    }
-    if ((ADCvalue[0] < adcThresh) && (ADCvalue[7] < adcThresh)) {       //1XXX XXX1
+    /*if ((ADCvalue[0] < adcThresh) && (ADCvalue[7] < adcThresh)) { //1XXX XXX1
       halt();
-    }
-
+      }
+      else if (ADCvalue[0] < adcThresh) { //1XXX XXXX or XXXX XXX1
+      handleCorner();
+      }
+      while (((ADCvalue[3] < adcThresh) || (ADCvalue[4] < adcThresh)) &&
+           ((ADCvalue[0] > adcThresh) && (ADCvalue[7] > adcThresh))) {  //0XXX 1XX0 or 0XX1 XXX0
+      lineStraight();
+      }*/
+      Serial.println(ADCvalue);
   }
   return 0;
 }
@@ -133,8 +133,13 @@ void initADC() {
 // ISR for ADC Completion
 ISR(ADC_vect) {
 
-  // Read the ADCvalue
-  ADCvalue[adcI] = ADC;
+  if (ADC < adcThresh) {
+    ADCvalue |= 1 << adcI;
+  }
+
+  else {
+    ADCvalue &= ~(1 << adcI);
+  }
 
   // Increment adcI
   // Prevent it from overflowing
@@ -152,34 +157,34 @@ ISR(ADC_vect) {
 
 // Function to gradually increase motor speed
 // to prevent the robot from leaping forward
-uint8_t accelerate(uint8_t motorXSpeed) {
+/*uint8_t accelerate(uint8_t motorXSpeed) {
   if (motorXSpeed < maxSpeed)
     motorXSpeed += 5;
   return motorXSpeed;
-}
+  }
 
-// Function to gradually decrease motor speed
-uint8_t decelerate(uint8_t motorXSpeed) {
+  // Function to gradually decrease motor speed
+  uint8_t decelerate(uint8_t motorXSpeed) {
   if (motorXSpeed >= 0x05)
     motorXSpeed -= 5;
   return motorXSpeed;
-}
+  }
 
-// Function to stop drivetrain
-void halt () {
+  // Function to stop drivetrain
+  void halt () {
   OCR1A = 0x00;
   OCR1B = 0x00;
-}
+  }
 
-// Follows the straight line
-// Checks to make sure middle two sensors always sees white
-void lineStraight() {
+  // Follows the straight line
+  // Checks to make sure middle two sensors always sees white
+  void lineStraight() {
   changeDir(0x00);
-  if ((ADCvalue[4] > adcThresh)) {          //XXX0 XXXX
+  if ((ADCvalue[4] > adcThresh)) {  //XXX0 XXXX
     motorASpeed  = decelerate(motorASpeed);
     OCR1A = motorASpeed;
   }
-  else if ((ADCvalue[3] > adcThresh)) {     //XXXX 0XXX
+  else if ((ADCvalue[3] > adcThresh)) { //XXXX 0XXX
     motorBSpeed  = decelerate(motorBSpeed);
     OCR1B = motorBSpeed;
   }
@@ -189,17 +194,17 @@ void lineStraight() {
     OCR1A = motorASpeed;
     OCR1B = motorBSpeed;
   }
-}
+  }
 
-void changeDir(uint8_t dir) {
+  void changeDir(uint8_t dir) {
   PINA &= ~0x03;
   PINA |= dir;
-}
-void handleCorner() {
+  }
+  void handleCorner() {
   changeDir(0x01);
   while ((ADCvalue[2] < adcThresh) || (ADCvalue[4] > adcThresh)) {  //XXX1 XXXX or XXXX X1XX
 
   }
 
   changeDir(0x00);
-}
+  }*/
