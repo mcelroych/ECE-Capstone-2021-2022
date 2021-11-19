@@ -23,12 +23,14 @@
 #include <math.h>
 
 const uint16_t adcThresh = 0x01F4; // Threshold of 500
-const uint8_t maxSpeed = 45;
+const uint8_t maxSpeed = 50;
 uint8_t motorASpeed;
 uint8_t motorBSpeed;
 uint8_t adcMux[8] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
 volatile uint8_t ADCvalue;
 int adcI;
+int decoder[2];
+int nextState;
 
 #include "Functions.h"
 
@@ -53,6 +55,7 @@ int main() {
   // Select the first input channel on the adcMux
   adcI = 0;
 
+  DDRE &= ~0x30;
   motorASpeed = 0;
   motorBSpeed = 0;
 
@@ -60,12 +63,13 @@ int main() {
 
   initPWM();
   initADC();
+  initDEC();
 
   sei();
 
-  int nextState = 3 ;
-
-  bool turnCheck;
+  nextState = 0;
+  decoder[0] = 0;
+  decoder[1] = 0;
 
   // Infinite Loop
   for (;;) {
@@ -81,15 +85,18 @@ int main() {
             accelerateL();
             accelerateR();
           }
-          if ((ADCvalue & 0x81) != 0x00)
+          if (((ADCvalue & 0x81) != 0x00) || (nextState == 4))
             break;
         }
-        if ((ADCvalue & 0x81) == 0x81)
+        if (ADCvalue == 0x00)
+          nextState = 3;
+        else if ((ADCvalue & 0x81) == 0x81)
           nextState = 4;
         else if ((ADCvalue & 0x81) == 0x01)
           nextState = 1;
         else if ((ADCvalue & 0x81) == 0x80)
           nextState = 2;
+
 
         break;
       case 1: // turnLeftState
@@ -115,14 +122,14 @@ int main() {
       case 3: // turnAroundState
         setSpeedR(maxSpeed);
         setSpeedL(maxSpeed);
+
         changeDir(0x01);
 
-        while (ADCvalue > 0x00);
-
         while ((ADCvalue & 0x08) != 0x08);
-        nextState = 0;
 
         changeDir(0x00);
+
+        nextState = 0;
 
         break;
       case 4: // haltState
@@ -212,4 +219,26 @@ ISR(ADC_vect) {
 
   // Set the ADSC bit to start conversion
   ADCSRA |= 0x40;
+}
+void initDEC() {
+  //Set all bits in the EICRB, EIMSK, and EIFR Registers to 0
+  EICRB &= ~0xFF;
+  EIMSK &= ~0xFF;
+
+  //
+  EICRB |= 0x0F;
+
+  //
+  EIMSK |= 0x30;
+}
+ISR(INT4_vect) {
+  decoder[0]++;
+  if (decoder[0] == 500)
+    nextState = 4;
+}
+
+ISR(INT5_vect) {
+  decoder[1]++;
+  if (decoder[1] == 500)
+    nextState = 4;
 }
