@@ -1,62 +1,92 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+
+// called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-int Direction = 22; // assigns pin 22 to DIR1 of Motor Driver
-int PWM = 11; // assigns 11 to PWM1 of Motor Driver
-
-void setup()  // setup loop
-{ Serial.begin(9600);
-  pinMode(Direction, OUTPUT); // declares pin 22 as output
-  pinMode(PWM, OUTPUT);  // declares pin 11 as output
- 
-
-}
 
 
-int main(void) {
-  init();
-  DDRB |= 0x20;
-  cli();
-  initPWM();
-  sei();
+//FIX THESE VALUES BY CALIBRATING           
 
+#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
+
+
+uint8_t servo = 3;
+uint8_t Motor = 4;
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("8 channel Servo test!");
+
+  pinMode(3, OUTPUT);
   
 
-
-
-
-}
-
-void initPWM() {
-
-  // Set all bits in TCCRnX registers to 0
-  TCCR1A &= ~0xFF;
-  TCCR1B &= ~0xDF;
-
-  // Set the COMnX bits in the TCCRnA registers
-  TCCR1A |= 0xA0;
-
-  // Set the WGM bits in the TCCRnA registers
-  TCCR1A |= 0x01;
-
-  // Set the CS bits in TCCRnB for a prescaler of 64
-  TCCR1B |= 0x03;
-
-  // Set the last WGM bits in TCCRnB for fast PWM, 8-bit
-  TCCR1B |= 0x08;
-
-  // Set the OCRnA registers for a 50% duty cycle
-  OCR1A = 0x00;
-  OCR1B = 0x00;
+  pwm.begin();
+  /*
+   * In theory the internal oscillator (clock) is 25MHz but it really isn't
+   * that precise. You can 'calibrate' this by tweaking this number until
+   * you get the PWM update frequency you're expecting!
+   * The int.osc. for the PCA9685 chip is a range between about 23-27MHz and
+   * is used for calculating things like writeMicroseconds()
+   * Analog servos run at ~50 Hz updates, It is importaint to use an
+   * oscilloscope in setting the int.osc frequency for the I2C PCA9685 chip.
+   * 1) Attach the oscilloscope to one of the PWM signal pins and ground on
+   *    the I2C PCA9685 chip you are setting the value for.
+   * 2) Adjust setOscillatorFrequency() until the PWM update frequency is the
+   *    expected value (50Hz for most ESCs)
+   * Setting the value here is specific to each individual I2C PCA9685 chip and
+   * affects the calculations for the PWM update frequency. 
+   * Failure to correctly set the int.osc value will cause unexpected PWM results
+   */
+    pwm.setOscillatorFrequency(27000000);
+    pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+    Arm();
+    delay(1000);
+    Fire();    
+ 
 }
 
 
-/* digitalWrite(Direction, HIGH);
-  for (int i=0; i<10000; i++){
-    analogWrite(PWM, i);
-  Serial.print(i);
-  //for(;;);
 
-  }
+void Arm(){
+  
+  digitalWrite(3, LOW);
+  pwm.setPWM(Motor, 500, 3500);
+  delay(3000); //change to 4 secs for initialization
+  pwm.setPWM(Motor, 1024, 1024);
+  pwm.setPWM(servo, 0, 320);
+  delay(2000); //change to 4 secs for initialization
+  //pwm.setPWM(servo, 0, 150);
+  digitalWrite(3, HIGH);
+  pwm.setPWM(Motor, 500, 3500);
+  delay(3000); //change to 4 secs for initialization
+  pwm.setPWM(Motor, 1024, 1024);
 
-  delay(100);*/
+
+
+  
+  
+}
+ void Disarm(){
+  
+  digitalWrite(3, HIGH);
+  pwm.setPWM(servo, 0, 150);
+  pwm.setPWM(Motor, 500, 3500);
+  delay(3000); //change to 4 secs for initialization
+  pwm.setPWM(Motor, 1024, 1024);
+  
+   
+}
+
+
+void Fire() {
+  pwm.setPWM(servo, 0, 150);
+}
+
+
+
+void loop() {
+ 
+ 
+  
+
+}
