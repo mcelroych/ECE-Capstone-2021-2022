@@ -1,36 +1,24 @@
+// Internal
+#include "Globals.h"
+#include "PWM.h"
+
+// Third-party
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
-
-//FIX THESE VALUES BY CALIBRATING           
-#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)
-
-#define USMINROD  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
-#define USMAXROD  1700 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
-#define USDROPROD  900
-#define USSTRAIGHTROD  1300
-#define USVERTICALROD 2000
-
-#define USMINSWIVEL 2200
-#define USMAXSWIVEL 2200
-#define USDROPSWIVEL 1150
-
-#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates
-
 uint8_t servonum2 = 2;
 uint8_t servonum1 = 1;
 uint8_t servonum = 0;
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   Serial.println("8 channel Servo test!");
 
   pinMode(2, OUTPUT);
-
 
   pwm.begin();
   /*
@@ -50,7 +38,7 @@ void setup() {
    * Failure to correctly set the int.osc value will cause unexpected PWM results
    */
   pwm.setOscillatorFrequency(27000000);
-  pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+  pwm.setPWMFreq(SERVO_FREQ); // Analog servos run at ~50 Hz updates
 
   pwm.writeMicroseconds(servonum1, USMINSWIVEL);
   pwm.writeMicroseconds(servonum, USMINROD);
@@ -58,13 +46,12 @@ void setup() {
   digitalWrite(2, LOW);
   pwm.setPWM(servonum2, 500, 3500);
   delay(4000); //change to 4 secs for initialization
-  
 
   delay(10);
 }
 
-
-void grabBead() {
+void grabBead()
+{
 
   Serial.println(servonum);
 
@@ -78,38 +65,41 @@ void grabBead() {
       pwm.setPWM(servonum, 0, pulselen); 
   }*/
 
-    //movement for swivel
-  for (uint16_t microsec = USMINSWIVEL; microsec < USMAXSWIVEL; microsec++) {
+  //movement for swivel
+  for (uint16_t microsec = USMINSWIVEL; microsec < USMAXSWIVEL; microsec++)
+  {
     pwm.writeMicroseconds(servonum1, microsec);
   }
-  
+
   //movement for rod
-  for (uint16_t microsec = USMINROD; microsec < USMAXROD; microsec++) {
+  for (uint16_t microsec = USMINROD; microsec < USMAXROD; microsec++)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
   delay(500);
 
-  for (uint16_t microsec = USMAXSWIVEL; microsec > USDROPSWIVEL; microsec--) {
+  for (uint16_t microsec = USMAXSWIVEL; microsec > USDROPSWIVEL; microsec--)
+  {
     pwm.writeMicroseconds(servonum1, microsec);
   }
 
   delay(500);
-  
-  for (uint16_t microsec = USMAXROD; microsec > USDROPROD; microsec--) {
+
+  for (uint16_t microsec = USMAXROD; microsec > USDROPROD; microsec--)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
-
   delay(500);
-  
-  //servonum++;
-  if (servonum > 1) servonum = 0;
 
-  
+  //servonum++;
+  if (servonum > 1)
+    servonum = 0;
 }
 
-void extendup(){
+void extendup()
+{
 
   digitalWrite(2, HIGH);
 
@@ -117,19 +107,22 @@ void extendup(){
 
   delay(1000);
 
-  for (uint16_t microsec = USMINROD; microsec < USVERTICALROD; microsec++) {
+  for (uint16_t microsec = USMINROD; microsec < USVERTICALROD; microsec++)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
   delay(3000);
-  
-  for (uint16_t microsec = USVERTICALROD; microsec > USSTRAIGHTROD; microsec--) {
+
+  for (uint16_t microsec = USVERTICALROD; microsec > USSTRAIGHTROD; microsec--)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
   delay(4000);
 
-  for (uint16_t microsec = USSTRAIGHTROD; microsec < USMAXROD; microsec++) {
+  for (uint16_t microsec = USSTRAIGHTROD; microsec < USMAXROD; microsec++)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
@@ -137,39 +130,42 @@ void extendup(){
 
   pwm.setPWM(servonum2, 1024, 1024);
 
-  for (uint16_t microsec = USMINSWIVEL; microsec > USDROPSWIVEL; microsec--) {
+  for (uint16_t microsec = USMINSWIVEL; microsec > USDROPSWIVEL; microsec--)
+  {
     pwm.writeMicroseconds(servonum1, microsec);
   }
 
-  for (uint16_t microsec = USMAXROD; microsec > USDROPROD; microsec--) {
+  for (uint16_t microsec = USMAXROD; microsec > USDROPROD; microsec--)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
   delay(1000);
 
-  for (uint16_t microsec = USDROPROD; microsec > USMINROD; microsec--) {
+  for (uint16_t microsec = USDROPROD; microsec > USMINROD; microsec--)
+  {
     pwm.writeMicroseconds(servonum, microsec);
   }
 
-  for (uint16_t microsec = USDROPSWIVEL; microsec < USMINSWIVEL; microsec++) {
+  for (uint16_t microsec = USDROPSWIVEL; microsec < USMINSWIVEL; microsec++)
+  {
     pwm.writeMicroseconds(servonum1, microsec);
   }
 
   digitalWrite(2, LOW);
 
   pwm.setPWM(servonum2, 500, 3500);
-  
+
   delay(14000);
 
   pwm.setPWM(servonum2, 1024, 1024);
 
   delay(1000);
-  
 }
 
-void loop() {
- 
+void loop()
+{
+
   //grabBead();
   extendup();
-
 }
