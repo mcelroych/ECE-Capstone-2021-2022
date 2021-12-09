@@ -58,7 +58,7 @@ void Arm(){
   //pwm.setPWM(servo, 0, 150);
   digitalWrite(3, HIGH);
   pwm.setPWM(Motor, 500, 3500);
-  delay(3000); //change to 4 secs for initialization
+  delay(2400); //change to 4 secs for initialization
   pwm.setPWM(Motor, 1024, 1024);
 
 
