@@ -23,6 +23,10 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 #define START_BUTTON 12
 
+
+uint8_t servonum5 = 5;
+uint8_t servonum4 = 4;
+uint8_t servonum3 = 3;
 uint8_t servonum2 = 2;
 uint8_t servonum1 = 1;
 uint8_t servonum = 0;
@@ -58,7 +62,17 @@ void setup() {
 //*****************setup******************************end
 
 void moveScreen(){
+  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
+    pwm.setPWM(servonum5, 0, pulselen);
+  }
+
+  delay(3000);
   
+  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {
+    pwm.setPWM(servonum5, 0, pulselen);
+  }
+
+  delay(3000);
 }
 
 void initServo(){
