@@ -38,6 +38,8 @@ int main(void) {
   // Configure PE4 and PE5 as inputs for decoders
   DDRE &= ~0x30;
 
+  DDRC &= ~0x40;
+
   // Select the first input channel on the adcMux
   adcI = 0;
 
@@ -58,16 +60,18 @@ int main(void) {
   decoder[0] = 0;
   decoder[1] = 0;
 
+  while((PINC & 0x60) == 0x00);
+  
   // Infinite Loop
   for (;;) {
     //Serial.println(ADCvalue);
     switch (nextState) {
       case 0:   // DriveForwardState1
-        lMotor->initSpeed(0x40);
+        lMotor->initSpeed(0x42);
         rMotor->initSpeed(0x40);
 
-        while (ADCvalue == 0xFF);
-        nextState = 1;
+        while ((ADCvalue & 0xC3) != 0x00);
+        nextState = 2;
         break;
 
       case 1:   // CenterState
