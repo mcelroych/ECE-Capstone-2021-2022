@@ -18,9 +18,7 @@ int main(void) {
   for (;;) {
     lMotor.initSpeed(baseSpeed);
     rMotor.initSpeed(baseSpeed);
-    turnRight();
-    lMotor.brake();
-    rMotor.brake();
+    trackLine();
     while(1);
     /*switch (state) {
       case 0: // stallState
