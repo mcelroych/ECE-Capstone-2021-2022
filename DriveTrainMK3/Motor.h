@@ -7,7 +7,7 @@ class Motor {
     Motor(uint16_t *_OCRnX, uint8_t *_PORTX, uint8_t _bitMask);
     void accelerate();
     void decelerate();
-    void initSpeed(uint8_t newSpeed);
+    void initSpeed(uint8_t newSpeed = 0x39);
     void changeDir();
     void brake();
     int getOCRnX();

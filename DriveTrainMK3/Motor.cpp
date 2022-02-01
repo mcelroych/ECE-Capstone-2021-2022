@@ -35,7 +35,7 @@ void Motor::decelerate() {
 void Motor::initSpeed(uint8_t newSpeed) {
   if (newSpeed > maxSpeed)
     currSpeed = maxSpeed;
-  else if(newSpeed < minSpeed)
+  else if (newSpeed < minSpeed)
     currSpeed = minSpeed;
   else
     currSpeed = newSpeed;
