@@ -14,6 +14,7 @@ int adcI;
 uint8_t baseSpeed = 0x40;
 double Pv;
 int diff;
+int state;
 
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
@@ -37,4 +38,7 @@ void startUp() {
 
   // Configure ADC pins on PortF pins
   DDRF &= ~0xFF; // Set PF0 - PF7 as inputs
+
+  // Initialize variables
+  state = 0;
 }
