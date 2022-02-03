@@ -16,7 +16,7 @@ int main(void) {
 
   // Infinite Loop
   for (;;) {
-    trackLine();
+    
     /*switch (state) {
       case 0: // stallState
 
