@@ -16,10 +16,7 @@ int main(void) {
 
   // Infinite Loop
   for (;;) {
-    lMotor.initSpeed(baseSpeed);
-    rMotor.initSpeed(baseSpeed);
     trackLine();
-    while(1);
     /*switch (state) {
       case 0: // stallState
 
