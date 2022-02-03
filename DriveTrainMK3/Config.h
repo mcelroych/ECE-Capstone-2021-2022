@@ -35,10 +35,6 @@ void startUp() {
   // PB5/Pin11: OCR1A (Left wheel), PB6/Pin12: OCR1B (Right Wheel)
   DDRB |= 0x60; // Set PB5 and PB6 as outputs
 
-  // Configure HC-SR04 trig and echo pins
-  DDRB |= 0x10; // set Pin10 as output
-  DDRE &= 0x10; // Set PIN2 as inout
-
   // Configure ADC pins on PortF pins
   DDRF &= ~0xFF; // Set PF0 - PF7 as inputs
 }

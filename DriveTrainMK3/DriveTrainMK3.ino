@@ -186,16 +186,16 @@ ISR(ADC_vect) {
   }
 
   // Increment adcI
-  // Prevent it from overflowing
+  // iterate till the end of the sensors
+  // let it overflow, will be used to detect end of conversions
   adcI++;
 
-  if (adcI > 7)
-    adcI = 0;
+  if (adcI < 7) {
+    // Select the next ADC input channel on the mux
+    ADMUX &= ~0x1F;
+    ADMUX |= adcI;
 
-  // Select the next ADC input channel on the mux
-  ADMUX &= ~0x1F;
-  ADMUX |= adcI;
-
-  // Set the ADSC bit to start conversion
-  ADCSRA |= 0x40;
+    // Set the ADSC bit to start conversion
+    ADCSRA |= 0x40;
+  }
 }
