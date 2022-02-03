@@ -14,7 +14,7 @@ int adcI;
 uint8_t baseSpeed = 0x40;
 double Pv;
 int diff;
-int state;
+int state, prevState;
 
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
@@ -41,4 +41,5 @@ void startUp() {
 
   // Initialize variables
   state = 0;
+  prevState = 0;
 }

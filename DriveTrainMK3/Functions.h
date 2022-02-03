@@ -53,8 +53,10 @@ void reverse() {
 void turnAround() {
   rMotor.changeDir();
 
-  while ((rADCvalue > 0x00) || (lADCvalue > 0x00));
-  while (rADCvalue != 0x01);
+   while ((rADCvalue > 0x00) || (lADCvalue > 0x00))
+    readADC();
+  while (rADCvalue != 0x01)
+    readADC();
 
   rMotor.changeDir();
 }
@@ -63,18 +65,63 @@ void turnAround() {
 void turnLeft() {
   lMotor.brake();
   rMotor.initSpeed(baseSpeed);
-  while (rADCvalue < 7);
+  while (rADCvalue < 7)
+    readADC();
 }
 
 //
 void turnRight() {
   rMotor.brake();
   lMotor.initSpeed(baseSpeed);
-  while (lADCvalue < 7);
+  while (lADCvalue < 7)
+    readADC();
 }
 
 //
 void brake() {
   lMotor.brake();
   rMotor.brake();
+}
+
+//
+void nextState() {
+  switch (state)
+  {
+  case 0: // trackLine State
+    if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F))
+      state = 1;
+    else if ((rADCvalue == 0x0F) && (lADCvalue != 0x0F))
+      state = 2;
+    else if ((lADCvalue | rADCvalue) == 0x00)
+      state = 5;
+    break;
+  
+  case 1: // turnLeft State
+    prevState = 1;
+    state = 0;
+    break;
+
+  case 2: // turnRight State
+    prevState = 2;
+    state = 0;
+    break;
+
+  case 3: // reverse State
+    /* code */
+    break;
+
+  case 4: // turnAround State
+    prevState = 4;
+    state = 0;
+    break;
+
+  case 5: // brake State
+    /* code */
+    break;
+
+  default:
+    prevState = 0;
+    state = 0;
+    break;
+  }
 }

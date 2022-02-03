@@ -17,102 +17,38 @@ int main(void) {
   // Infinite Loop
   for (;;) {
 
-    /*switch (state) {
-      case 0: // stallState
+    switch (state) {
 
-        // while(;;);
-
-        state = 1;
-
+      case 0: // trackLine State
+        trackLine();
         break;
 
-      case 1: // forwardState
-        PORTA &= ~0x03;
-        lMotor.initSpeed(baseSpeed);
-        rMotor.initSpeed(baseSpeed);
-
-        while (((lADCvalue & 0x08) != 0x00) || ((rADCvalue & 0x08) != 0x00));
-
-        state = 5;
+      case 1: // turnLeft State
+        turnLeft();
         break;
 
-      case 2: // reverseState
-        PORTA |= 0x03;
-        lMotor.initSpeed(baseSpeed);
-        rMotor.initSpeed(baseSpeed);
+      case 2: // turnRight State
+        turnRight();
         break;
 
-      case 3: // haltState
-        lMotor.brake();
-        rMotor.brake();
+      case 3: // reverse State
+        reverse();
         break;
 
-      case 4: // turnAroundState
-
-        rMotor.changeDir();
-
-        while (rADCvalue > 0x00);
-        while (rADCvalue != 0x03);
-
-        lMotor.changeDir();
-
-        state = 5;
+      case 4: // turnAround State
+        turnAround();
         break;
 
-      case 5: // trackLineState
-        Pid.reset();
-
-        lMotor.initSpeed(baseSpeed);
-        rMotor.initSpeed(baseSpeed);
-
-        while (state == 5)
-        {
-          Pv = lADCvalue - rADCvalue;
-          diff = Pid.controlFunc(Pv);
-
-          //inches = echo / 18.50;
-
-          if (diff > 0) {
-            lMotor.initSpeed(baseSpeed - diff);
-            rMotor.initSpeed(baseSpeed + diff);
-          }
-          else if (diff < 0) {
-            rMotor.initSpeed(baseSpeed - diff);
-            lMotor.initSpeed(baseSpeed + diff);
-          }
-
-          if (rADCvalue == 0x0F) {
-            rMotor.brake();
-            lMotor.initSpeed(baseSpeed);
-            while (lADCvalue > 3);
-            while (lADCvalue < 1);
-            rMotor.initSpeed(baseSpeed);
-          }
-
-          else if (lADCvalue == 0x0F) {
-            lMotor.brake();
-            rMotor.initSpeed(baseSpeed);
-            while (rADCvalue < 7);
-          }
-
-          else if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
-            state = 4;
-            lMotor.changeDir();
-            rMotor.changeDir();
-            lMotor.initSpeed(baseSpeed);
-            rMotor.initSpeed(baseSpeed);
-            while ((lADCvalue == 0x00) && (rADCvalue == 0x00));
-
-            break;
-          }
-
-        }
+      case 5: // brake State
+        brake();
         break;
 
       default:
+        state = 0;
         break;
+    }
 
-      }*/
+    nextState();
   }
 }
 
