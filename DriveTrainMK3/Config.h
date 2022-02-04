@@ -15,6 +15,10 @@ uint8_t baseSpeed = 0x40;
 double Pv;
 int diff;
 int state, prevState;
+bool fallingEdge;
+int timer2OVF;
+int t1;
+float inches;
 
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
@@ -39,7 +43,14 @@ void startUp() {
   // Configure ADC pins on PortF pins
   DDRF &= ~0xFF; // Set PF0 - PF7 as inputs
 
+  // Configure HC-SR04 sensor pins
+  // PB4/Pin10: Trigger Pin, PE4/Pin2: Echo Pin
+  DDRB |= 0x10; // set Pin10 as output
+  DDRE &= 0x10; // Set PIN2 as input
+
   // Initialize variables
   state = 0;
   prevState = 0;
+  timer2OVF = 0;
+  fallingEdge = false;
 }
