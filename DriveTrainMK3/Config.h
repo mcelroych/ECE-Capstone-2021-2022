@@ -8,13 +8,13 @@
 #include "PID.h"
 
 // Global variables
-const uint16_t adcThresh =  0x012C; // Threshold of 300
+const uint16_t adcThresh = 0x012C; // Threshold of 300
 volatile uint8_t lADCvalue, rADCvalue;
 int adcI;
 uint8_t baseSpeed = 0x40;
 double Pv;
 int diff;
-int state, prevState;
+int state;
 bool fallingEdge;
 int timer2OVF;
 int t1;
@@ -23,7 +23,7 @@ float inches;
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02);
-PID Pid = PID(0.00, 1.00, 0.80);
+PID Pid = PID(0.00, 1.00, 2.00);
 
 void startUp() {
   init();
@@ -50,7 +50,7 @@ void startUp() {
 
   // Initialize variables
   state = 0;
-  prevState = 0;
   timer2OVF = 0;
   fallingEdge = false;
+  inches = 0.00;
 }
