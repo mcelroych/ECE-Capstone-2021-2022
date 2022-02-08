@@ -148,40 +148,41 @@ void brake() {
 void nextState() {
   switch (state)
   {
-    case 0: // trackLine State
-      if ((inches > 0.00) && (inches <= 5.50))
-        state = 4;
-      else if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F))
+    case 0: // start State
+    if
         state = 1;
-      else if ((rADCvalue == 0x0F) && (lADCvalue != 0x0F))
-        state = 2;
+        break;
 
-      break;
+      case 1: // preTurn State
+        
+        break;
 
-    case 1: // turnLeft State
-      readADC();
-      if (rADCvalue >= 0x01)
+      case 2: // end State
+        
+        break;
+
+      case 3: // turnLeft State
+        
+        break;
+
+      case 4: // turnRight State
+        
+        break;
+
+      case 5: // turnAround State
+        
+        break;
+      
+      case 6: // reverse State
+        
+        break;
+
+      case 7: // brake State
+        
+        break;
+
+      default:
         state = 0;
-      break;
-
-    case 2: // turnRight State
-      state = 0;
-      break;
-
-    case 3: // reverse State
-      /* code */
-      break;
-
-    case 4: // turnAround State
-      state = 0;
-      break;
-
-    case 5: // brake State
-      /* code */
-      break;
-
-    default:
-      state = 0;
-      break;
+        break;
   }
 }

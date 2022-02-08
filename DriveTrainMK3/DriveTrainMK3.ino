@@ -11,8 +11,8 @@ int main(void) {
 
   initPWM();
   initADC();
-  initTimer2Trig();
-  initINT4();
+  //initTimer2Trig();
+  //initINT4();
 
   sei();
 
@@ -20,27 +20,35 @@ int main(void) {
   for (;;) {
     switch (state) {
 
-      case 0: // trackLine State
+      case 0: // start State
         trackLine();
         break;
 
-      case 1: // turnLeft State
+      case 1: // preTurn State
+        trackLine();
+        break;
+
+      case 2: // end State
+        trackLine();
+        break;
+
+      case 3: // turnLeft State
         turnLeft();
         break;
 
-      case 2: // turnRight State
+      case 4: // turnRight State
         turnRight();
         break;
 
-      case 3: // reverse State
+      case 5: // turnAround State
+        turnAround();
+        break;
+      
+      case 6: // reverse State
         reverse();
         break;
 
-      case 4: // turnAround State
-        turnAround();
-        break;
-
-      case 5: // brake State
+      case 7: // brake State
         brake();
         break;
 
