@@ -14,7 +14,7 @@ int adcI;
 uint8_t baseSpeed = 0x40;
 double Pv;
 int diff;
-int state;
+int state, lastState;
 bool fallingEdge;
 int timer2OVF;
 int t1;
@@ -49,7 +49,8 @@ void startUp() {
   DDRE &= 0x10; // Set PIN2 as input
 
   // Initialize variables
-  state = 0;
+  state = 1;
+  lastState = 0;
   timer2OVF = 0;
   fallingEdge = false;
   inches = 0.00;

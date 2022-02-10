@@ -79,7 +79,6 @@ void getDistance() {
 //
 void trackLine() {
   readADC();
-  getDistance();
   Pv = lADCvalue - rADCvalue;
   diff = Pid.controlFunc(Pv);
 
@@ -146,43 +145,70 @@ void brake() {
 
 //
 void nextState() {
+  // Store the state we are in
+  int currState = state;
+
   switch (state)
   {
     case 0: // start State
-    if
-        state = 1;
-        break;
+      //if
+      //state = 1;
+    break;
 
-      case 1: // preTurn State
-        
-        break;
+  case 1: // trackLine State
+    switch (lastState)
+      {
+        case 4:
+          getDistance();
+          if ((inches != 0.00) && (inches <= 5.00)) {
+            state = 5;
+            inches = 0.00;
+          }
+          break;
 
-      case 2: // end State
-        
-        break;
+        default:
+          if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F))
+            state = 3;
+          else if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F))
+            state = 4;
+          else if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
+            state = 7;
+          break;
+      }
 
-      case 3: // turnLeft State
-        
-        break;
 
-      case 4: // turnRight State
-        
-        break;
+      break;
 
-      case 5: // turnAround State
-        
-        break;
-      
-      case 6: // reverse State
-        
-        break;
+    case 2: // end State
+      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
+        state = 5;
+      break;
 
-      case 7: // brake State
-        
-        break;
+    case 3: // turnLeft State
+      state = 2;
+      break;
 
-      default:
-        state = 0;
-        break;
+    case 4: // turnRight State
+      state = 1;
+      break;
+
+    case 5: // turnAround State
+      state = 1;
+      break;
+
+    case 6: // reverse State
+
+      break;
+
+    case 7: // brake State
+
+      break;
+
+    default:
+      state = 0;
+      break;
   }
+
+  if (currState != state)
+    lastState = currState;
 }

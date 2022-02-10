@@ -24,7 +24,7 @@ int main(void) {
         trackLine();
         break;
 
-      case 1: // preTurn State
+      case 1: // trackLine State
         trackLine();
         break;
 
@@ -43,7 +43,7 @@ int main(void) {
       case 5: // turnAround State
         turnAround();
         break;
-      
+
       case 6: // reverse State
         reverse();
         break;
