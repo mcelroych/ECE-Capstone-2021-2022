@@ -16,6 +16,7 @@ double Pv;
 int diff;
 int state, lastState;
 bool fallingEdge;
+bool inStart;
 int timer2OVF;
 int t1;
 float inches;
@@ -23,7 +24,7 @@ float inches;
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02);
-PID Pid = PID(0.00, 1.00, 2.00);
+PID Pid = PID(0.00, 1.00, 3.00);
 
 void startUp() {
   init();
@@ -49,9 +50,10 @@ void startUp() {
   DDRE &= 0x10; // Set PIN2 as input
 
   // Initialize variables
-  state = 1;
+  state = 0;
   lastState = 0;
   timer2OVF = 0;
   fallingEdge = false;
+  inStart = true;
   inches = 0.00;
 }

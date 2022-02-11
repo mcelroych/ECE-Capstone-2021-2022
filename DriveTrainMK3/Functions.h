@@ -79,6 +79,7 @@ void getDistance() {
 //
 void trackLine() {
   readADC();
+  getDistance();
   Pv = lADCvalue - rADCvalue;
   diff = Pid.controlFunc(Pv);
 
@@ -94,19 +95,22 @@ void trackLine() {
 
 //
 void reverse() {
-  readADC();
+  /*readADC();
 
-  Pv = lADCvalue - rADCvalue;
-  diff = Pid.controlFunc(Pv);
+    Pv = lADCvalue - rADCvalue;
+    diff = Pid.controlFunc(Pv);
 
-  if (diff > 0) {
+    if (diff > 0) {
     rMotor.initSpeed(baseSpeed - diff);
     lMotor.initSpeed(baseSpeed + diff);
-  }
-  else if (diff < 0) {
+    }
+    else if (diff < 0) {
     lMotor.initSpeed(baseSpeed - diff);
     rMotor.initSpeed(baseSpeed + diff);
-  }
+    }*/
+  readADC();
+  lMotor.initSpeed(baseSpeed - 1);
+  rMotor.initSpeed(baseSpeed);
 }
 
 //
@@ -115,7 +119,7 @@ void turnAround() {
   readADC();
   while ((rADCvalue > 0x00) || (lADCvalue > 0x00))
     readADC();
-  while (rADCvalue != 0x01)
+  while (lADCvalue < 0x01)
     readADC();
 
   rMotor.changeDir();
@@ -127,13 +131,17 @@ void turnLeft() {
   rMotor.initSpeed(baseSpeed);
   while (rADCvalue > 0x00)
     readADC();
+  while (rADCvalue != 0x03)
+    readADC();
 }
 
 //
 void turnRight() {
   rMotor.brake();
   lMotor.initSpeed(baseSpeed);
-  while (lADCvalue < 7)
+  while (lADCvalue > 0x00)
+    readADC();
+  while (lADCvalue != 0x03)
     readADC();
 }
 
@@ -145,59 +153,73 @@ void brake() {
 
 //
 void nextState() {
-  // Store the state we are in
-  int currState = state;
-
   switch (state)
   {
     case 0: // start State
-      //if
-      //state = 1;
-    break;
+      readADC();
+      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
+        inStart = false;
+      if (inStart == false)
+        if ((lADCvalue != 0x0F) && (rADCvalue != 0x0F)) {
+          state = 1;
+          lastState = 0;
+        }
+      break;
 
-  case 1: // trackLine State
-    switch (lastState)
-      {
-        case 4:
-          getDistance();
-          if ((inches != 0.00) && (inches <= 5.00)) {
-            state = 5;
-            inches = 0.00;
-          }
-          break;
+    case 1: // trackLine State
+      if (lastState == 4) {
+        if ((inches != 0.00) && (inches <= 5.00)) {
+          state = 5;
+          inches = 0.00;
+          lastState = 1;
+        }
+      }
 
-        default:
-          if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F))
-            state = 3;
-          else if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F))
-            state = 4;
-          else if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
-            state = 7;
-          break;
+      if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F)) {
+        state = 3;
+        lastState = 1;
+      }
+      else if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F)) {
+        state = 4;
+        lastState = 1;
+      }
+      else if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
+        state = 7;
+        lastState = 1;
       }
 
 
       break;
 
     case 2: // end State
-      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
-        state = 5;
+      if ((lADCvalue == 0x00) && (rADCvalue == 0x00)) {
+        PORTA ^= 0x03;
+        state = 6;
+        lastState = 2;
+      }
       break;
 
     case 3: // turnLeft State
       state = 2;
+      lastState = 3;
       break;
 
     case 4: // turnRight State
       state = 1;
+      lastState = 4;
       break;
 
     case 5: // turnAround State
       state = 1;
+      lastState = 5;
       break;
 
     case 6: // reverse State
-
+      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
+        PORTA ^= 0x03;
+        state = 5;
+        lastState = 6;
+      }
       break;
 
     case 7: // brake State
@@ -208,7 +230,4 @@ void nextState() {
       state = 0;
       break;
   }
-
-  if (currState != state)
-    lastState = currState;
 }
