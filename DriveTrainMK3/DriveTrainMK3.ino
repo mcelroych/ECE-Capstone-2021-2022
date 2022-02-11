@@ -11,8 +11,8 @@ int main(void) {
 
   initPWM();
   initADC();
-  //initTimer2Trig();
-  //initINT4();
+  initTimer2Trig();
+  initINT4();
 
   sei();
 
