@@ -24,7 +24,7 @@ float inches;
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02);
-PID Pid = PID(0.00, 1.00, 3.00);
+PID Pid = PID(0.00, 1.00, 4.00);
 
 void startUp() {
   init();

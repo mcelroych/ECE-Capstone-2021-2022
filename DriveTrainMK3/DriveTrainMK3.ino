@@ -28,27 +28,35 @@ int main(void) {
         trackLine();
         break;
 
-      case 2: // end State
-        trackLine();
-        break;
-
-      case 3: // turnLeft State
-        turnLeft();
-        break;
-
-      case 4: // turnRight State
+      case 2: // turnRight State
         turnRight();
         break;
 
-      case 5: // turnAround State
+      case 3: // down State
+        trackLine();
+        break;
+
+      case 4: // turnAround State
         turnAround();
         break;
 
-      case 6: // reverse State
+      case 5: // back State
+        trackLine();
+        break;
+
+      case 6: // turnLeft State
+        turnLeft();
+        break;
+
+      case 7: // end State
+        trackLine();
+        break;
+
+      case 8: // reverse State
         reverse();
         break;
 
-      case 7: // brake State
+      case 9: // brake State
         brake();
         break;
 

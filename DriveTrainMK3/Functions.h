@@ -156,78 +156,99 @@ void nextState() {
   switch (state)
   {
     case 0: // start State
-      readADC();
+
       if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
         inStart = false;
+
       if (inStart == false)
         if ((lADCvalue != 0x0F) && (rADCvalue != 0x0F)) {
           state = 1;
           lastState = 0;
         }
+
       break;
 
     case 1: // trackLine State
-      if (lastState == 4) {
-        if ((inches != 0.00) && (inches <= 5.00)) {
-          state = 5;
-          inches = 0.00;
-          lastState = 1;
+
+      if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F)) {
+        state = 2;
+        lastState = 1;
+      }
+
+      break;
+
+    case 2: // turnRight State
+
+      state = 3;
+      lastState = 2;
+
+      break;
+
+    case 3: // down State
+
+      if ((inches != 0.00) && (inches <= 5.00)) {
+        state = 4;
+        lastState = 3;
+      }
+
+      break;
+
+    case 4: // turnAround State
+
+      if (lastState == 3)
+        state = 5;
+
+      else
+        state = 1;
+
+      lastState = 4;
+
+      break;
+
+    case 5: // back State
+
+      if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F)) {
+        if(inches < 10.00){
+          state = 6;
+          lastState = 5;
         }
       }
 
-      if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F)) {
-        state = 3;
-        lastState = 1;
-      }
-      else if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F)) {
-        state = 4;
-        lastState = 1;
-      }
-      else if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
-        state = 7;
-        lastState = 1;
-      }
+      break;
 
+    case 6: // turnLeft State
+
+      state = 7;
+      lastState = 6;
 
       break;
 
-    case 2: // end State
+    case 7: // end State
+
       if ((lADCvalue == 0x00) && (rADCvalue == 0x00)) {
         PORTA ^= 0x03;
-        state = 6;
-        lastState = 2;
+        state = 8;
+        lastState = 7;
       }
+
       break;
 
-    case 3: // turnLeft State
-      state = 2;
-      lastState = 3;
-      break;
+    case 8: // reverse State
 
-    case 4: // turnRight State
-      state = 1;
-      lastState = 4;
-      break;
-
-    case 5: // turnAround State
-      state = 1;
-      lastState = 5;
-      break;
-
-    case 6: // reverse State
       if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
         PORTA ^= 0x03;
-        state = 5;
-        lastState = 6;
+        state = 4;
+        lastState = 8;
       }
+
       break;
 
-    case 7: // brake State
-
+    case 9: // brake State
+      brake();
       break;
 
     default:
-      state = 0;
+      state = 1;
       break;
   }
 }
