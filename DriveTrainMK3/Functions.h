@@ -141,7 +141,7 @@ void turnRight() {
   lMotor.initSpeed(baseSpeed);
   while (lADCvalue > 0x00)
     readADC();
-  while (lADCvalue != 0x03)
+  while (rADCvalue != 0x01)
     readADC();
 }
 
