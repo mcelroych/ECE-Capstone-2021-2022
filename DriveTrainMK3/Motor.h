@@ -15,8 +15,8 @@ class Motor {
     int getSpeed();
 
   private:
-    const uint8_t minSpeed = 0x39; //
-    const uint8_t maxSpeed = 0x45; //
+    const uint8_t minSpeed = 0x30; //
+    const uint8_t maxSpeed = 0x50; //
     uint8_t currSpeed;
     uint16_t *OCRnX;
     uint8_t *PORTX;

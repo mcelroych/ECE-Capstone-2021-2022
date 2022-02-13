@@ -95,31 +95,18 @@ void trackLine() {
 
 //
 void reverse() {
-  /*readADC();
-
-    Pv = lADCvalue - rADCvalue;
-    diff = Pid.controlFunc(Pv);
-
-    if (diff > 0) {
-    rMotor.initSpeed(baseSpeed - diff);
-    lMotor.initSpeed(baseSpeed + diff);
-    }
-    else if (diff < 0) {
-    lMotor.initSpeed(baseSpeed - diff);
-    rMotor.initSpeed(baseSpeed + diff);
-    }*/
   readADC();
-  lMotor.initSpeed(baseSpeed - 1);
+  lMotor.initSpeed(baseSpeed - 4);
   rMotor.initSpeed(baseSpeed);
 }
 
 //
 void turnAround() {
-  rMotor.changeDir();
-  readADC();
+  //rMotor.changeDir();
+  delay(1000);
   while ((rADCvalue > 0x00) || (lADCvalue > 0x00))
     readADC();
-  while (lADCvalue < 0x01)
+  while (lADCvalue != 0x01)
     readADC();
 
   rMotor.changeDir();
@@ -129,9 +116,9 @@ void turnAround() {
 void turnLeft() {
   lMotor.brake();
   rMotor.initSpeed(baseSpeed);
-  while (rADCvalue > 0x00)
+  while (lADCvalue > 0x00)
     readADC();
-  while (rADCvalue != 0x03)
+  while (lADCvalue != 0x01)
     readADC();
 }
 
@@ -156,7 +143,7 @@ void nextState() {
   switch (state)
   {
     case 0: // start State
-
+      readADC();
       if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
         inStart = false;
 
@@ -187,6 +174,7 @@ void nextState() {
     case 3: // down State
 
       if ((inches != 0.00) && (inches <= 5.00)) {
+        rMotor.changeDir();
         state = 4;
         lastState = 3;
       }
@@ -208,7 +196,7 @@ void nextState() {
     case 5: // back State
 
       if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F)) {
-        if(inches < 10.00){
+        if (inches < 10.00) {
           state = 6;
           lastState = 5;
         }
@@ -239,6 +227,7 @@ void nextState() {
         PORTA ^= 0x03;
         state = 4;
         lastState = 8;
+        rMotor.changeDir();
       }
 
       break;
