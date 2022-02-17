@@ -5,12 +5,12 @@
 
 class PID {
   public:
-    PID(double _Sp, double _Dt, double _Kp, double _Ki = 0, double _Kd = 0);
+    PID(uint8_t _Sp, double _Dt, double _Kp, double _Ki = 0, double _Kd = 0);
     double controlFunc(uint8_t Pv);
     void reset();
 
   private:
-    double Sp;
+    uint8_t Sp;
     double Dt;
     double Integral;
     double pErr;

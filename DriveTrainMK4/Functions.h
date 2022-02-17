@@ -22,92 +22,52 @@ void initPWM() {
   TCCR1B |= 0x08;
 }
 
-// Initalizes ADC Conversions
-void initADC() {
-
-  // Set all bits in the ADCMUX and ADCSRX Registers to 0
-  ADMUX &= ~0xFF;
-  ADCSRA &= ~0xFF;
-  ADCSRB &= ~0x4F;
-
-  // Set the REFSn bits for a reference voltage of AVCC
-  ADMUX |= 0x40;
-
-  // Set the ADEN bit to enable ADC conversions
-  ADCSRA |= 0x80;
-
-  // Set the ADIE bit to enable interrupts
-  ADCSRA |= 0x08;
-
-  // Set the ADPSn bits for a prescaler of 2
-  ADCSRA |= 0x01;
-}
-
-//
-void initTimer2Trig() {
-  TCCR2A |= 0x03; // Fast PWM
-  OCR2A = 0x01;   // Compare value of 1
-  TIMSK2 |= 0x03; // Output Compare A Interrupt and OVF Enabled
-}
-
-//
-void  initINT4() {
-  EICRB |= 0x01;
-  EIMSK |= 0x10;
-}
-
-//
-void readADC() {
-  // Select the first ADC input channel
-  adcI = 0;
-  ADMUX &= ~0x1F;
-  ADMUX |= adcI;
-
-  // Hold until conversions are complete
-  while (adcI < 7) {
-    // Set the ADSC bit to start conversion
-    ADCSRA |= 0x40;
-  }
-}
-
 //
 void getDistance() {
-  TCCR2A |= 0x80; // OC2A set to non-inverting mode
-  TCCR2B |= 0x01; // Turn on timer2 with prescaler of 1
+  IRvalue = ~(PINK | 0x07);
+}
+
+//
+void getLine() {
+  ADCvalue = ~PINF;
 }
 
 //
 void trackLine() {
-  readADC();
   getDistance();
-  Pv = lADCvalue - rADCvalue;
-  diff = Pid.controlFunc(Pv);
+  getLine();
+  int diff = Pid.controlFunc(ADCvalue);
 
   if (diff > 0) {
-    lMotor.initSpeed(baseSpeed - diff);
-    rMotor.initSpeed(baseSpeed + diff);
+    lMotor.initSpeed(baseSpeed + diff);
+    rMotor.initSpeed(baseSpeed - diff);
   }
   else if (diff < 0) {
-    rMotor.initSpeed(baseSpeed - diff);
-    lMotor.initSpeed(baseSpeed + diff);
+    rMotor.initSpeed(baseSpeed + diff);
+    lMotor.initSpeed(baseSpeed - diff);
   }
 }
 
 //
 void reverse() {
-  readADC();
   lMotor.initSpeed(baseSpeed - 4);
   rMotor.initSpeed(baseSpeed);
 }
 
 //
 void turnAround() {
-  //rMotor.changeDir();
-  delay(1000);
-  while ((rADCvalue > 0x00) || (lADCvalue > 0x00))
-    readADC();
-  while (lADCvalue != 0x01)
-    readADC();
+  rMotor.changeDir();
+
+  getLine();
+
+  while ((ADCvalue | 0x80) != 0x80)
+    getLine();
+
+  while (ADCvalue > 0x00)
+    getLine();
+
+  while ((ADCvalue | 0x10) != 0x10)
+    getLine();
 
   rMotor.changeDir();
 }
@@ -116,20 +76,22 @@ void turnAround() {
 void turnLeft() {
   lMotor.brake();
   rMotor.initSpeed(baseSpeed);
-  while (lADCvalue > 0x00)
-    readADC();
-  while (lADCvalue != 0x01)
-    readADC();
+
+  while ((ADCvalue | 0xF0) > 0x00)
+    getLine();
+  while ((ADCvalue | 0xF0) != 0x10)
+    getLine();
 }
 
 //
 void turnRight() {
   rMotor.brake();
   lMotor.initSpeed(baseSpeed);
-  while (lADCvalue > 0x00)
-    readADC();
-  while (rADCvalue != 0x01)
-    readADC();
+
+  while ((ADCvalue | 0xF0) > 0x00)
+    getLine();
+  while ((ADCvalue | 0x0F) != 0x08)
+    getLine();
 }
 
 //
@@ -143,12 +105,12 @@ void nextState() {
   switch (state)
   {
     case 0: // start State
-      readADC();
-      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F))
+
+      if (ADCvalue == 0xFF)
         inStart = false;
 
       if (inStart == false)
-        if ((lADCvalue != 0x0F) && (rADCvalue != 0x0F)) {
+        if (ADCvalue != 0xFF) {
           state = 1;
           lastState = 0;
         }
@@ -157,7 +119,7 @@ void nextState() {
 
     case 1: // trackLine State
 
-      if ((lADCvalue != 0x0F) && (rADCvalue == 0x0F)) {
+      if ((ADCvalue | 0x0F) == 0x0F) {
         state = 2;
         lastState = 1;
       }
@@ -173,8 +135,7 @@ void nextState() {
 
     case 3: // down State
 
-      if ((inches != 0.00) && (inches <= 5.00)) {
-        rMotor.changeDir();
+      if (IRvalue > 0x00) {
         state = 4;
         lastState = 3;
       }
@@ -195,11 +156,9 @@ void nextState() {
 
     case 5: // back State
 
-      if ((lADCvalue == 0x0F) && (rADCvalue != 0x0F)) {
-        if (inches < 10.00) {
-          state = 6;
-          lastState = 5;
-        }
+      if ((ADCvalue | 0xF0) == 0xF0) {
+        state = 6;
+        lastState = 5;
       }
 
       break;
@@ -213,7 +172,7 @@ void nextState() {
 
     case 7: // end State
 
-      if ((lADCvalue == 0x00) && (rADCvalue == 0x00)) {
+      if (ADCvalue == 0x00) {
         PORTA ^= 0x03;
         state = 8;
         lastState = 7;
@@ -223,11 +182,10 @@ void nextState() {
 
     case 8: // reverse State
 
-      if ((lADCvalue == 0x0F) && (rADCvalue == 0x0F)) {
+      if (ADCvalue == 0xFF) {
         PORTA ^= 0x03;
         state = 4;
         lastState = 8;
-        rMotor.changeDir();
       }
 
       break;
