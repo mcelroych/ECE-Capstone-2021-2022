@@ -1,8 +1,8 @@
 # include "Motor.h"
 
 // Constuctor
-Motor::Motor(uint16_t *_OCRnX, uint8_t *_PORTX, uint8_t _bitMask):
-  OCRnX(_OCRnX), PORTX(_PORTX), bitMask(_bitMask), currSpeed(0x00), dir(0x00)
+Motor::Motor(uint16_t *_OCRnX, uint8_t *_PORTX, uint8_t _bitMask, uint8_t _minSpeed, uint8_t _baseSpeed, uint8_t _maxSpeed):
+  OCRnX(_OCRnX), PORTX(_PORTX), bitMask(_bitMask), minSpeed(_minSpeed), baseSpeed(_baseSpeed), maxSpeed(_maxSpeed), currSpeed(0x00), dir(0x00)
 {
   // intentionally blank
 }

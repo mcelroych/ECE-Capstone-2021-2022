@@ -9,6 +9,7 @@ int main(void) {
   cli();
 
   initPWM();
+  initISR();
 
   sei();
 
@@ -19,7 +20,7 @@ int main(void) {
     switch (state) {
 
       case 0: // stall State
-        
+
         break;
 
       case 1: // start State
@@ -62,6 +63,14 @@ int main(void) {
         brake();
         break;
 
+      case 11: // allignFront State
+        trackLine(minSpeed);
+        break;
+
+      case 12: // allignBack State
+        reverse(minSpeed);
+        break;
+
       default:
         state = 0;
         break;
@@ -69,4 +78,16 @@ int main(void) {
 
     nextState();
   }
+}
+
+//
+ISR(PCINT0_vect) {
+  if ((PINB & 0x0f) == 0x01)
+    state = 10;
+  else if ((PINB & 0x0f) == 0x02)
+    state = 11;
+  else if ((PINB & 0x0f) == 0x04)
+    state = 12;
+  else if ((PINB & 0x0f) == 0x08)
+    state = returnState;
 }

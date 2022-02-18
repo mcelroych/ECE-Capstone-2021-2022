@@ -11,13 +11,15 @@
 uint8_t lineValue;
 int IRvalue;
 bool turnCond;
-uint8_t baseSpeed = 0x45;
-int state, lastState;
+uint8_t minSpeed = 0x27;
+uint8_t baseSpeed = 0x35;
+uint8_t maxSpeed = 0x3E;
+int state, lastState, returnState;
 bool inStart;
 
 // Initialization of class objects
-Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
-Motor rMotor = Motor(&OCR1B, &PORTA, 0x02);
+Motor lMotor = Motor(&OCR1A, &PORTA, 0x01, minSpeed, baseSpeed, maxSpeed);
+Motor rMotor = Motor(&OCR1B, &PORTA, 0x02, minSpeed, baseSpeed, maxSpeed);
 PID Pid = PID(0x08, 1.00, 2.00);
 
 void startUp() {
@@ -42,6 +44,14 @@ void startUp() {
   // Configure Pins on PortK for IR-Sensor
   DDRK &= ~0x01; // Set PK0 - PK2 as inputs
   PORTK |= 0x01; // Activate Pull-up resistors
+
+  // Configure PCINT0 Pins for interrupts
+  DDRB &= ~0x0F; // Set PB0 - PB3 as inputs
+  PORTL &= ~0x0F; // Disable Pull-up Resistors
+
+  // Configure start pin
+  DDRL &= ~0x01; // Set PL0 as input
+  PORTL &= ~0x01; // Disable Pull-up Resistor
 
   // Initialize variables
   state = 0;

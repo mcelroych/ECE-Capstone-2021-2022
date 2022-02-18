@@ -22,17 +22,26 @@ void initPWM() {
   TCCR1B |= 0x08;
 }
 
+// Initializes interrupt pins
+void initISR() {
+  PCICR &= ~0x07;
+  PCMSK0 &= ~0xFF;
+
+  PCICR |= 0x01;
+  PCMSK0 |= 0x0F;
+}
+
 //
 void getDistance() {
-  
-  if ((PINK & 0x01) == 0x01) 
+
+  if ((PINK & 0x01) == 0x01)
     IRvalue++;
-  else 
+  else
     IRvalue = 0;
 
-  if(IRvalue == 3)
+  if (IRvalue == 3)
     turnCond = true;
-  else  
+  else
     turnCond = false;
 }
 
@@ -42,37 +51,40 @@ void getLine() {
 }
 
 //
-void trackLine() {
+void trackLine(uint8_t speed = baseSpeed) {
   getDistance();
   getLine();
   int diff = Pid.controlFunc(lineValue);
 
   if (diff > 0) {
-    lMotor.initSpeed(baseSpeed + diff);
-    rMotor.initSpeed(baseSpeed - diff);
+    lMotor.initSpeed(speed + diff);
+    rMotor.initSpeed(speed - diff);
   }
   else if (diff < 0) {
-    rMotor.initSpeed(baseSpeed + diff);
-    lMotor.initSpeed(baseSpeed - diff);
+    rMotor.initSpeed(speed + diff);
+    lMotor.initSpeed(speed - diff);
   }
 }
 
 //
-void reverse() {
+void reverse(uint8_t speed = baseSpeed) {
   getLine();
-  lMotor.initSpeed(baseSpeed - 4);
-  rMotor.initSpeed(baseSpeed);
+  lMotor.initSpeed(speed - 4);
+  rMotor.initSpeed(speed);
 }
 
 //
 void turnAround() {
   rMotor.changeDir();
 
+  delay(100);
   getLine();
 
   while ((lineValue & 0x80) != 0x80)
     getLine();
   while (lineValue > 0x00)
+    getLine();
+  while (lineValue == 0x00)
     getLine();
   while ((lineValue & 0x10) != 0x10)
     getLine();
@@ -111,8 +123,12 @@ void brake() {
 //
 void nextState() {
   switch (state) {
-    
+
     case 0: // stall State
+      if ((PINL & 0x01) == 0x01) {
+        state = 1;
+        lastState = 0;
+      }
 
       break;
 
@@ -206,8 +222,18 @@ void nextState() {
 
       break;
 
+    case 11: // allignFront State
+
+      break;
+
+    case 12: // allignBack State
+
+      break;
+
     default:
       state = 0;
       break;
   }
+  if (state < 10)
+    returnState = state;
 }

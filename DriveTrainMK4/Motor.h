@@ -4,10 +4,10 @@
 
 class Motor {
   public:
-    Motor(uint16_t *_OCRnX, uint8_t *_PORTX, uint8_t _bitMask);
+    Motor(uint16_t *_OCRnX, uint8_t *_PORTX, uint8_t _bitMask, uint8_t _minSpeed, uint8_t _baseSpeed, uint8_t _maxSpeed);
     void accelerate();
     void decelerate();
-    void initSpeed(uint8_t newSpeed = 0x39);
+    void initSpeed(uint8_t newSpeed);
     void changeDir();
     void brake();
     int getOCRnX();
@@ -15,8 +15,9 @@ class Motor {
     int getSpeed();
 
   private:
-    const uint8_t minSpeed = 0x30; //
-    const uint8_t maxSpeed = 0x50; //
+    uint8_t minSpeed; //
+    uint8_t baseSpeed;
+    uint8_t maxSpeed; //
     uint8_t currSpeed;
     uint16_t *OCRnX;
     uint8_t *PORTX;
