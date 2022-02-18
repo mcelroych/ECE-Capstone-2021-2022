@@ -24,7 +24,16 @@ void initPWM() {
 
 //
 void getDistance() {
-  IRvalue = (PINK & 0x01);
+  
+  if ((PINK & 0x01) == 0x01) 
+    IRvalue++;
+  else 
+    IRvalue = 0;
+
+  if(IRvalue == 3)
+    turnCond = true;
+  else  
+    turnCond = false;
 }
 
 //
@@ -134,7 +143,7 @@ void nextState() {
 
     case 3: // down State
 
-      if ((IRvalue & 0x01) == 0x01) {
+      if (turnCond == true) {
         state = 4;
         lastState = 3;
       }

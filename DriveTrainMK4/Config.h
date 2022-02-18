@@ -10,7 +10,8 @@
 // Global variables
 const uint16_t adcThresh = 0x012C; // Threshold of 300
 uint8_t lineValue;
-uint8_t IRvalue;
+int IRvalue;
+bool turnCond;
 int adcI;
 uint8_t baseSpeed = 0x45;
 int state, lastState;
@@ -45,7 +46,9 @@ void startUp() {
   PORTK |= 0x01; // Activate Pull-up resistors
 
   // Initialize variables
-  state = 3;
-  lastState = 2;
+  state = 0;
+  lastState = 0;
   inStart = true;
+  turnCond = false;
+  IRvalue = 0;
 }
