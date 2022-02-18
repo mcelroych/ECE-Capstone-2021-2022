@@ -9,7 +9,7 @@
 
 // Global variables
 const uint16_t adcThresh = 0x012C; // Threshold of 300
-uint8_t ADCvalue;
+uint8_t lineValue;
 uint8_t IRvalue;
 int adcI;
 uint8_t baseSpeed = 0x45;
@@ -19,7 +19,7 @@ bool inStart;
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02);
-PID Pid = PID(0x18, 1.00, 1.00);
+PID Pid = PID(0x08, 1.00, 2.00);
 
 void startUp() {
   init();
@@ -41,11 +41,11 @@ void startUp() {
   PORTF |= 0xFF; // Activate Pull-up Resistors
 
   // Configure Pins on PortK for IR-Sensor
-  DDRK &= ~0x07; // Set PK0 - PK2 as inputs
-  PORTK |= 0x07; // Activate Pull-up resistors
+  DDRK &= ~0x01; // Set PK0 - PK2 as inputs
+  PORTK |= 0x01; // Activate Pull-up resistors
 
   // Initialize variables
-  state = 0;
-  lastState = 0;
+  state = 3;
+  lastState = 2;
   inStart = true;
 }

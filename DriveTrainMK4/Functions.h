@@ -24,19 +24,19 @@ void initPWM() {
 
 //
 void getDistance() {
-  IRvalue = ~(PINK | 0x07);
+  IRvalue = (PINK & 0x01);
 }
 
 //
 void getLine() {
-  ADCvalue = ~PINF;
+  lineValue = ~PINF;
 }
 
 //
 void trackLine() {
   getDistance();
   getLine();
-  int diff = Pid.controlFunc(ADCvalue);
+  int diff = Pid.controlFunc(lineValue);
 
   if (diff > 0) {
     lMotor.initSpeed(baseSpeed + diff);
@@ -50,6 +50,7 @@ void trackLine() {
 
 //
 void reverse() {
+  getLine();
   lMotor.initSpeed(baseSpeed - 4);
   rMotor.initSpeed(baseSpeed);
 }
@@ -60,13 +61,11 @@ void turnAround() {
 
   getLine();
 
-  while ((ADCvalue | 0x80) != 0x80)
+  while ((lineValue & 0x80) != 0x80)
     getLine();
-
-  while (ADCvalue > 0x00)
+  while (lineValue > 0x00)
     getLine();
-
-  while ((ADCvalue | 0x10) != 0x10)
+  while ((lineValue & 0x10) != 0x10)
     getLine();
 
   rMotor.changeDir();
@@ -77,9 +76,9 @@ void turnLeft() {
   lMotor.brake();
   rMotor.initSpeed(baseSpeed);
 
-  while ((ADCvalue | 0xF0) > 0x00)
+  while ((lineValue & 0xF0) > 0x00)
     getLine();
-  while ((ADCvalue | 0xF0) != 0x10)
+  while ((lineValue & 0x08) != 0x08)
     getLine();
 }
 
@@ -88,9 +87,9 @@ void turnRight() {
   rMotor.brake();
   lMotor.initSpeed(baseSpeed);
 
-  while ((ADCvalue | 0xF0) > 0x00)
+  while ((lineValue & 0x0F) > 0x00)
     getLine();
-  while ((ADCvalue | 0x0F) != 0x08)
+  while ((lineValue & 0x10) != 0x10)
     getLine();
 }
 
@@ -106,11 +105,11 @@ void nextState() {
   {
     case 0: // start State
 
-      if (ADCvalue == 0xFF)
+      if (lineValue == 0xFF)
         inStart = false;
 
       if (inStart == false)
-        if (ADCvalue != 0xFF) {
+        if ((lineValue & 0x01) != 0x01) {
           state = 1;
           lastState = 0;
         }
@@ -119,7 +118,7 @@ void nextState() {
 
     case 1: // trackLine State
 
-      if ((ADCvalue | 0x0F) == 0x0F) {
+      if ((lineValue & 0x0F) == 0x0F) {
         state = 2;
         lastState = 1;
       }
@@ -135,7 +134,7 @@ void nextState() {
 
     case 3: // down State
 
-      if (IRvalue > 0x00) {
+      if ((IRvalue & 0x01) == 0x01) {
         state = 4;
         lastState = 3;
       }
@@ -156,7 +155,7 @@ void nextState() {
 
     case 5: // back State
 
-      if ((ADCvalue | 0xF0) == 0xF0) {
+      if ((lineValue & 0xF0) == 0xF0) {
         state = 6;
         lastState = 5;
       }
@@ -172,7 +171,7 @@ void nextState() {
 
     case 7: // end State
 
-      if (ADCvalue == 0x00) {
+      if (lineValue == 0x00) {
         PORTA ^= 0x03;
         state = 8;
         lastState = 7;
@@ -182,7 +181,7 @@ void nextState() {
 
     case 8: // reverse State
 
-      if (ADCvalue == 0xFF) {
+      if (lineValue == 0xFF) {
         PORTA ^= 0x03;
         state = 4;
         lastState = 8;
