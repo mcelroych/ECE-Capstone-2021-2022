@@ -102,8 +102,10 @@ void reverse() {
 
 //
 void turnAround() {
-  //rMotor.changeDir();
+  rMotor.changeDir();
   delay(1000);
+  while ((lADCvalue & 0x08) == 0x00)
+    readADC();
   while ((rADCvalue > 0x00) || (lADCvalue > 0x00))
     readADC();
   while (lADCvalue != 0x01)
@@ -174,7 +176,6 @@ void nextState() {
     case 3: // down State
 
       if ((inches != 0.00) && (inches <= 5.00)) {
-        rMotor.changeDir();
         state = 4;
         lastState = 3;
       }
@@ -227,7 +228,6 @@ void nextState() {
         PORTA ^= 0x03;
         state = 4;
         lastState = 8;
-        rMotor.changeDir();
       }
 
       break;

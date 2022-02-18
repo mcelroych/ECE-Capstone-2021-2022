@@ -8,11 +8,9 @@
 #include "PID.h"
 
 // Global variables
-const uint16_t adcThresh = 0x012C; // Threshold of 300
 uint8_t lineValue;
 int IRvalue;
 bool turnCond;
-int adcI;
 uint8_t baseSpeed = 0x45;
 int state, lastState;
 bool inStart;

@@ -1,5 +1,4 @@
 //
-//
 
 #include "Config.h"
 #include "Functions.h"
@@ -19,43 +18,47 @@ int main(void) {
   for (;;) {
     switch (state) {
 
-      case 0: // start State
+      case 0: // stall State
+        
+        break;
+
+      case 1: // start State
         trackLine();
         break;
 
-      case 1: // trackLine State
+      case 2: // trackLine State
         trackLine();
         break;
 
-      case 2: // turnRight State
+      case 3: // turnRight State
         turnRight();
         break;
 
-      case 3: // down State
+      case 4: // down State
         trackLine();
         break;
 
-      case 4: // turnAround State
+      case 5: // turnAround State
         turnAround();
         break;
 
-      case 5: // back State
+      case 6: // back State
         trackLine();
         break;
 
-      case 6: // turnLeft State
+      case 7: // turnLeft State
         turnLeft();
         break;
 
-      case 7: // end State
+      case 8: // end State
         trackLine();
         break;
 
-      case 8: // reverse State
+      case 9: // reverse State
         reverse();
         break;
 
-      case 9: // brake State
+      case 10: // brake State
         brake();
         break;
 
