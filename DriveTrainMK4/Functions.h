@@ -34,14 +34,14 @@ void initISR() {
 //
 void getDistance() {
 
-  if ((PINK & 0x01) == 0x01)
+  if ((PINK & 0x03) == 0x03)
     IRvalue++;
   else
     IRvalue = 0;
 
-  if (IRvalue == 3)
+  if(IRvalue == 3)
     turnCond = true;
-  else
+  else 
     turnCond = false;
 }
 

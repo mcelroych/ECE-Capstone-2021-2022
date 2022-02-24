@@ -38,25 +38,30 @@ void startUp() {
   DDRB |= 0x60; // Set PB5 and PB6 as outputs
 
   // Configure Pins on PortF for Linesensor Array
+  // PF0/A0: Sensor8, -> ... -> , PF7/A7: Sensor1
   DDRF &= ~0xFF; // Set PF0 - PF7 as inputs
   PORTF |= 0xFF; // Activate Pull-up Resistors
 
   // Configure Pins on PortK for IR-Sensor
-  DDRK &= ~0x01; // Set PK0 - PK2 as inputs
-  PORTK |= 0x01; // Activate Pull-up resistors
+  // PK0/A8: RightSensor , PK1/A9: LeftSensor
+  DDRK &= ~0x03; // Set PK0 - PK1 as inputs
+  PORTK |= 0x03; // Activate Pull-up resistors
 
   // Configure PCINT0 Pins for interrupts
+  // PB0/Pin53: BrakePin, PB1/Pin52: FrontPin,
+  // PB2/Pin51: BackPin, PB3/Pin50: ReturnPin 
   DDRB &= ~0x0F; // Set PB0 - PB3 as inputs
-  PORTL &= ~0x0F; // Disable Pull-up Resistors
+  PORTB &= ~0x0F; // Disable Pull-up Resistors
 
-  // Configure start pin
+  // Configure start pin PL0/Pin49
   DDRL &= ~0x01; // Set PL0 as input
   PORTL &= ~0x01; // Disable Pull-up Resistor
 
   // Initialize variables
-  state = 0;
+  state = 1;
   lastState = 0;
   inStart = true;
-  turnCond = false;
-  IRvalue = 0;
-}
+
+  
+  IRvalue = 0;      // 
+  turnCond = false; // 

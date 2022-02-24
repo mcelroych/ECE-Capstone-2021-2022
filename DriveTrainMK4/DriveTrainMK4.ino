@@ -13,8 +13,6 @@ int main(void) {
 
   sei();
 
-  //while(1);
-
   // Infinite Loop
   for (;;) {
     switch (state) {
@@ -82,12 +80,12 @@ int main(void) {
 
 //
 ISR(PCINT0_vect) {
-  if ((PINB & 0x0f) == 0x01)
+  if ((PINB & 0x0f) == 0x01) //brake state PB0 D53
     state = 10;
-  else if ((PINB & 0x0f) == 0x02)
+  else if ((PINB & 0x0f) == 0x02) //front PB1 D52
     state = 11;
-  else if ((PINB & 0x0f) == 0x04)
+  else if ((PINB & 0x0f) == 0x04) //back (left) PB2 D51
     state = 12;
-  else if ((PINB & 0x0f) == 0x08)
+  else if ((PINB & 0x0f) == 0x08) //PB3 D50
     state = returnState;
 }
