@@ -49,7 +49,7 @@ void startUp() {
 
   // Configure PCINT0 Pins for interrupts
   // PB0/Pin53: BrakePin, PB1/Pin52: FrontPin,
-  // PB2/Pin51: BackPin, PB3/Pin50: ReturnPin 
+  // PB2/Pin51: BackPin, PB3/Pin50: ReturnPin
   DDRB &= ~0x0F; // Set PB0 - PB3 as inputs
   PORTB &= ~0x0F; // Disable Pull-up Resistors
 
@@ -61,7 +61,6 @@ void startUp() {
   state = 1;
   lastState = 0;
   inStart = true;
-
-  
-  IRvalue = 0;      // 
-  turnCond = false; // 
+  IRvalue = 0;      
+  turnCond = false; 
+}

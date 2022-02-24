@@ -39,9 +39,9 @@ void getDistance() {
   else
     IRvalue = 0;
 
-  if(IRvalue == 3)
+  if (IRvalue == 3)
     turnCond = true;
-  else 
+  else
     turnCond = false;
 }
 
