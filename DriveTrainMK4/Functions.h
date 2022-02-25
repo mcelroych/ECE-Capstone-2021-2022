@@ -75,8 +75,23 @@ void trackLine(uint8_t speed = baseSpeed) {
 // reverse state, tracking the line is unreliable due to 
 // sensor array being on the opposite end of travel
 void reverse(uint8_t speed = baseSpeed) {
-  lMotor.initSpeed(speed - 4);
-  rMotor.initSpeed(speed);
+  getLine();
+  if(lineValue == 0x00){
+    lMotor.initSpeed(speed - 4);
+    rMotor.initSpeed(speed);
+  }
+  else {
+    int diff = Pid.controlFunc(lineValue);
+
+    if (diff > 0) {
+      lMotor.initSpeed(speed - diff);
+      rMotor.initSpeed(speed + diff);
+    }
+    else if (diff < 0) {
+      rMotor.initSpeed(speed - diff);
+      lMotor.initSpeed(speed + diff);
+    }
+  }
 }
 
 // function has multiple while loops designed to 
