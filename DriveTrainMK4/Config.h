@@ -11,7 +11,7 @@
 uint8_t lineValue;
 int IRvalue;
 bool turnCond;
-uint8_t minSpeed = 0x27;
+uint8_t minSpeed = 0x2A;
 uint8_t baseSpeed = 0x35;
 uint8_t maxSpeed = 0x3E;
 int state, lastState, returnState;

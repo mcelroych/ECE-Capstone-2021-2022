@@ -31,7 +31,9 @@ void initISR() {
   PCMSK0 |= 0x0F;
 }
 
-//
+// Checks the compared results from the two distance sensors
+// sets the turnCond boolean true if within range of the wall
+// range set with a potentiomete on the breakout board
 void getDistance() {
 
   if ((PINK & 0x03) == 0x03)
@@ -45,12 +47,15 @@ void getDistance() {
     turnCond = false;
 }
 
-//
+// Reads the compared results from the line sensor array
+// threshold is set by a potentiometer on the breakout board
 void getLine() {
   lineValue = ~PINF;
 }
 
-//
+// Recieves control signal from the PID controller class
+// seeks to drive the system to be centered on the line
+// and moving forward
 void trackLine(uint8_t speed = baseSpeed) {
   getDistance();
   getLine();
@@ -66,14 +71,19 @@ void trackLine(uint8_t speed = baseSpeed) {
   }
 }
 
-//
+// Sets the motor speed to account for drift in the 
+// reverse state, tracking the line is unreliable due to 
+// sensor array being on the opposite end of travel
 void reverse(uint8_t speed = baseSpeed) {
-  getLine();
   lMotor.initSpeed(speed - 4);
   rMotor.initSpeed(speed);
 }
 
-//
+// function has multiple while loops designed to 
+// gate the function from exiting until the sensor array
+// fully leaves the line and returns, on the return it
+// looks for the robot to be centered enough for the PID 
+// to take over and stabalize 
 void turnAround() {
   rMotor.changeDir();
 
