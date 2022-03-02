@@ -11,9 +11,9 @@
 uint8_t lineValue;
 int IRvalue;
 bool turnCond;
-uint8_t minSpeed = 0x2A;
-uint8_t baseSpeed = 0x35;
-uint8_t maxSpeed = 0x3E;
+uint8_t minSpeed = 0x30;
+uint8_t baseSpeed = 0x40;
+uint8_t maxSpeed = 0x50;
 int state, lastState, returnState;
 bool inStart;
 
@@ -54,11 +54,12 @@ void startUp() {
   PORTB &= ~0x0F; // Disable Pull-up Resistors
 
   // Configure start pin PL0/Pin49
-  DDRL &= ~0x01; // Set PL0 as input
-  PORTL &= ~0x01; // Disable Pull-up Resistor
+  DDRG &= ~0x02; // Set PG1 as input
+  PORTG &= ~0x02; // Disable Pull-up Resistor
+  PING &= ~0x02;
 
   // Initialize variables
-  state = 1;
+  state = 0;
   lastState = 0;
   inStart = true;
   IRvalue = 0;      

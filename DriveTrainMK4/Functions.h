@@ -71,12 +71,12 @@ void trackLine(uint8_t speed = baseSpeed) {
   }
 }
 
-// Sets the motor speed to account for drift in the 
-// reverse state, tracking the line is unreliable due to 
+// Sets the motor speed to account for drift in the
+// reverse state, tracking the line is unreliable due to
 // sensor array being on the opposite end of travel
 void reverse(uint8_t speed = baseSpeed) {
   getLine();
-  if(lineValue == 0x00){
+  if (lineValue == 0x00) {
     lMotor.initSpeed(speed - 4);
     rMotor.initSpeed(speed);
   }
@@ -94,27 +94,21 @@ void reverse(uint8_t speed = baseSpeed) {
   }
 }
 
-// function has multiple while loops designed to 
+// function has multiple while loops designed to
 // gate the function from exiting until the sensor array
 // fully leaves the line and returns, on the return it
-// looks for the robot to be centered enough for the PID 
-// to take over and stabalize 
+// looks for the robot to be centered enough for the PID
+// to take over and stabalize
 void turnAround() {
   rMotor.changeDir();
 
-  delay(100);
-  getLine();
-
-  while ((lineValue & 0x80) != 0x80)
-    getLine();
-  while (lineValue > 0x00)
+  delay(200);
+  while (lineValue != 0x00)
     getLine();
   while (lineValue == 0x00)
     getLine();
   while ((lineValue & 0x10) != 0x10)
     getLine();
-
-  rMotor.changeDir();
 }
 
 //
@@ -150,7 +144,7 @@ void nextState() {
   switch (state) {
 
     case 0: // stall State
-      if ((PINL & 0x01) == 0x01) {
+      if ((PING & 0x02) == 0x02) {
         state = 1;
         lastState = 0;
       }
@@ -197,8 +191,14 @@ void nextState() {
 
     case 5: // turnAround State
 
-      if (lastState == 4)
-        state = 6;
+      if (lastState == 4) {
+        getLine();
+        if ((lineValue & 0x10) == 0x10) {
+          state = 6;
+          rMotor.changeDir();
+        }
+      }
+
 
       else
         state = 2;
