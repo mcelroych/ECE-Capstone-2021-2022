@@ -51,45 +51,50 @@ void getDistance() {
 // threshold is set by a potentiometer on the breakout board
 void getLine() {
   lineValue = ~PINF;
+  rValue = lineValue & 0x0F;
+  lValue = (lineValue >> 4) & 0x0F;
 }
 
 // Recieves control signal from the PID controller class
 // seeks to drive the system to be centered on the line
 // and moving forward
-void trackLine(uint8_t speed = baseSpeed) {
+void trackLine() {
   getDistance();
   getLine();
-  int diff = Pid.controlFunc(lineValue);
 
-  if (diff > 0) {
-    lMotor.initSpeed(speed + diff);
-    rMotor.initSpeed(speed - diff);
+  int diff = Pid.controlFunc(lValue - rValue);
+
+  if (diff < 0) {
+    lMotor.initSpeed(baseSpeed + diff);
+    rMotor.initSpeed(baseSpeed - diff);
   }
-  else if (diff < 0) {
-    rMotor.initSpeed(speed + diff);
-    lMotor.initSpeed(speed - diff);
+  else if (diff > 0) {
+    rMotor.initSpeed(baseSpeed + diff);
+    lMotor.initSpeed(baseSpeed - diff);
   }
 }
+
 
 // Sets the motor speed to account for drift in the
 // reverse state, tracking the line is unreliable due to
 // sensor array being on the opposite end of travel
-void reverse(uint8_t speed = baseSpeed) {
+void reverse() {
   getLine();
-  if (lineValue == 0x00) {
-    lMotor.initSpeed(speed - 4);
-    rMotor.initSpeed(speed);
+  if ((lValue == 0x00) && (rValue = 0x00)) {
+    lMotor.initSpeed(baseSpeed + 4);
+    rMotor.initSpeed(baseSpeed);
   }
+
   else {
-    int diff = Pid.controlFunc(lineValue);
+    int diff = Pid.controlFunc(lValue - rValue);
 
     if (diff > 0) {
-      lMotor.initSpeed(speed - diff);
-      rMotor.initSpeed(speed + diff);
+      lMotor.initSpeed(baseSpeed + diff);
+      rMotor.initSpeed(baseSpeed - diff);
     }
     else if (diff < 0) {
-      rMotor.initSpeed(speed - diff);
-      lMotor.initSpeed(speed + diff);
+      rMotor.initSpeed(baseSpeed + diff);
+      lMotor.initSpeed(baseSpeed - diff);
     }
   }
 }
@@ -100,37 +105,50 @@ void reverse(uint8_t speed = baseSpeed) {
 // looks for the robot to be centered enough for the PID
 // to take over and stabalize
 void turnAround() {
+  cli();
   rMotor.changeDir();
 
-  delay(200);
-  while (lineValue != 0x00)
+  delay(1000);
+  getLine();
+  while ((lValue & 0x08) != 0x08) {
     getLine();
-  while (lineValue == 0x00)
-    getLine();
-  while ((lineValue & 0x10) != 0x10)
-    getLine();
+    if ((lValue & 0x08) == 0x08) {
+      delay(50);
+      getLine();
+    }
+  }
+  sei();
 }
 
 //
 void turnLeft() {
+  cli();
   lMotor.brake();
-  rMotor.initSpeed(baseSpeed);
+  rMotor.initSpeed(maxSpeed);
 
-  while ((lineValue & 0xF0) > 0x00)
+  while (rValue != 0x00)
     getLine();
-  while ((lineValue & 0x08) != 0x08)
+  while (rValue == 0x00)
     getLine();
+  while (lValue < 0x08)
+    getLine();
+  sei();
 }
 
 //
 void turnRight() {
+  cli();
   rMotor.brake();
-  lMotor.initSpeed(baseSpeed);
+  lMotor.initSpeed(maxSpeed);
 
-  while ((lineValue & 0x0F) > 0x00)
+  while (rValue != 0x00)
     getLine();
-  while ((lineValue & 0x10) != 0x10)
+  while (rValue == 0x00)
     getLine();
+  while (rValue < 0x08)
+    getLine();
+  sei();
+
 }
 
 //
@@ -144,7 +162,7 @@ void nextState() {
   switch (state) {
 
     case 0: // stall State
-      if ((PING & 0x02) == 0x02) {
+      if ((PINL & 0x80) == 0x80) {
         state = 1;
         lastState = 0;
       }
@@ -153,11 +171,11 @@ void nextState() {
 
     case 1: // start State
 
-      if (lineValue == 0xFF)
+      if ((lValue == 0x0F) && (rValue = 0x0F))
         inStart = false;
 
       if (inStart == false)
-        if ((lineValue & 0x01) != 0x01) {
+        if ((rValue & 0x01) != 0x01) {
           state = 2;
           lastState = 1;
         }
@@ -166,7 +184,7 @@ void nextState() {
 
     case 2: // trackLine State
 
-      if ((lineValue & 0x0F) == 0x0F) {
+      if (rValue == 0x0F) {
         state = 3;
         lastState = 2;
       }
@@ -176,6 +194,7 @@ void nextState() {
     case 3: // turnRight State
 
       state = 4;
+      returnState = 4;
       lastState = 3;
 
       break;
@@ -192,13 +211,10 @@ void nextState() {
     case 5: // turnAround State
 
       if (lastState == 4) {
-        getLine();
-        if ((lineValue & 0x10) == 0x10) {
-          state = 6;
-          rMotor.changeDir();
-        }
-      }
 
+        state = 6;
+        rMotor.changeDir();
+      }
 
       else
         state = 2;
@@ -208,10 +224,13 @@ void nextState() {
       break;
 
     case 6: // back State
-
-      if ((lineValue & 0xF0) == 0xF0) {
-        state = 7;
-        lastState = 6;
+      if ((lValue & 0x01) == 0x01) {
+        delay(80);
+        getLine();
+        if ((lValue & 0x01) == 0x01) {
+          state = 7;
+          lastState = 6;
+        }
       }
 
       break;
@@ -224,10 +243,9 @@ void nextState() {
       break;
 
     case 8: // end State
-
-      if (lineValue == 0x00) {
-        PORTA ^= 0x03;
-        state = 9;
+      getLine();
+      if (lineValue == 0xFF) {
+        state = 5;
         lastState = 8;
       }
 
@@ -235,7 +253,7 @@ void nextState() {
 
     case 9: // reverse State
 
-      if (lineValue == 0xFF) {
+      if ((lValue == 0x0F) && (rValue = 0x0F)) {
         PORTA ^= 0x03;
         state = 5;
         lastState = 9;
@@ -247,12 +265,10 @@ void nextState() {
 
       break;
 
-    case 11: // allignFront State
-
-      break;
-
-    case 12: // allignBack State
-
+    case 11:
+      lMotor.initSpeed(baseSpeed);
+      rMotor.initSpeed(baseSpeed);
+      state = returnState;
       break;
 
     default:

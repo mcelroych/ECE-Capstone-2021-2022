@@ -17,13 +17,12 @@ Servo launcherServo;  // create servo object to control a servo
 
 #define UPDOWN_START 10
 #define UPDOWN_DUMP  37
-#define UPDOWN_HOLD  110
+#define UPDOWN_HOLD  100
 #define UPDOWN_TOP   155
 #define UPDOWN_STEPS UPDOWN_TOP - UPDOWN_HOLD
-#define UPDOWN_DUMP_STEPS UPDOWN_HOLD - UPDOWN_DUMP
 
-#define LA_UP_DIR   0
-#define LA_DOWN_DIR 1
+#define LA_UP_DIR   1
+#define LA_DOWN_DIR 0
 
 #define LAUNCH_VALUE 2300
 #define ENCODER_PIN 21
@@ -36,8 +35,7 @@ Servo launcherServo;  // create servo object to control a servo
 #define ARM_GRAB  31
 #define READY     32
 #define START_BTN 52
-#define DT_ENABLE 55
-#define DT_RESUME 49
+#define DT_ENABLE 53
 
 volatile int encoderValue = 0;
 bool armed = false;
@@ -51,26 +49,15 @@ void setup() {
   pinMode(DT_ENABLE, OUTPUT);
   pinMode(FIRE_PIN, INPUT);
   pinMode(READY, OUTPUT);
-  pinMode(ARM_GRAB, INPUT);
+  pinMode(ARM_GRAB, OUTPUT);
   pinMode(START_BTN, INPUT);
-  pinMode(DT_RESUME, OUTPUT);
-  digitalWrite(DT_RESUME, LOW);
   while (!digitalRead(START_BTN));
 
+  //screenMove();
   launcherArm();
-  armPrep();
+  //armPrep();
+  lock();
   digitalWrite(DT_ENABLE, HIGH);
-
-  while (!digitalRead(ARM_GRAB));
-  armGrabBead();
-
-  digitalWrite(READY, HIGH);
-  delay(500);
-  digitalWrite(READY, LOW);
-  
-  digitalWrite(DT_RESUME, HIGH);
-  delay(500);
-  digitalWrite(DT_RESUME, LOW);
 
   while (!digitalRead(FIRE_PIN));
   launcherFire();
@@ -81,11 +68,6 @@ void setup() {
   digitalWrite(READY, HIGH);
   delay(500);
   digitalWrite(READY, LOW);
-
-  digitalWrite(DT_RESUME, HIGH);
-  delay(500);
-  digitalWrite(DT_RESUME, LOW);
-  
 }
 
 void loop() {
@@ -177,10 +159,10 @@ void armGrabBead() {
 
   for (int i = 0; i < UPDOWN_STEPS; i ++ ) {
     upDown.write(UPDOWN_TOP - i);
-    delay(49);
+    delay(40);
   }//this will  total a delay of 2.2 seconds
 
-  delay(5545);
+  delay(5550);
   analogWrite(LA_PWM_PIN, 0);
 
   //drop in the launcher phase
@@ -189,16 +171,7 @@ void armGrabBead() {
     delay(10);
   }
 
-  digitalWrite(LA_DIR_PIN, LA_DOWN_DIR);
-  analogWrite(LA_PWM_PIN, 254);
-  delay(1000);
-  analogWrite(LA_PWM_PIN, 0);
-
-  for (int i = 0; i < UPDOWN_DUMP_STEPS; i++) {
-    upDown.write(UPDOWN_HOLD - i);
-    delay(10);
-  }
-  
+  upDown.write(UPDOWN_DUMP);
   delay(2000);
 
   //reset
@@ -207,18 +180,18 @@ void armGrabBead() {
 
   digitalWrite(LA_DIR_PIN, LA_DOWN_DIR);
   analogWrite(LA_PWM_PIN, 254);
-  delay(7500);
+  delay(8500);
   analogWrite(LA_PWM_PIN, 0);
 
 }
 
-void armPrep() {
-  digitalWrite(LA_DIR_PIN, LA_UP_DIR);
-  analogWrite(LA_PWM_PIN, 254);
-  delay(750);
-  upDown.write(UPDOWN_TOP);
-  analogWrite(LA_PWM_PIN, 0);
-}
+//void armPrep() {
+//  digitalWrite(LA_DIR_PIN, LA_UP_DIR);
+//  analogWrite(LA_PWM_PIN, 254);
+//  delay(750);
+//  upDown.write(UPDOWN_TOP);
+//  analogWrite(LA_PWM_PIN, 0);
+//}
 
 void screenInit() {
   screen.attach(SCREEN_SERVO_PIN);

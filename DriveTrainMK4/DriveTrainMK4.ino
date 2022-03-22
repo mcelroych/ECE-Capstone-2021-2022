@@ -12,17 +12,24 @@ int main(void) {
   initISR();
 
   sei();
-
+  /*while(1) {
+    getLine();
+    Serial.print(lValue);
+    Serial.print(" ");
+    Serial.println(rValue);
+    }*/
   // Infinite Loop
   for (;;) {
     switch (state) {
 
       case 0: // stall State
-    
+
         break;
 
       case 1: // start State
-        trackLine();
+        lMotor.initSpeed(baseSpeed + 5);
+        rMotor.initSpeed(baseSpeed);
+        getLine();
         break;
 
       case 2: // trackLine State
@@ -61,14 +68,6 @@ int main(void) {
         brake();
         break;
 
-      case 11: // allignFront State
-        trackLine(0x32);
-        break;
-
-      case 12: // allignBack State
-        reverse(0x32);
-        break;
-
       default:
         state = 0;
         break;
@@ -80,12 +79,12 @@ int main(void) {
 
 //
 ISR(PCINT0_vect) {
-  if ((PINB & 0x0f) == 0x01) // brake state PB0 D53
+  if ((PINB & 0x09) == 0x01) // brake state PB0 D53
     state = 10;
   //else if ((PINB & 0x0f) == 0x02); // front PB1 D52
-   // state = 11;
+  // state = 11;
   //else if ((PINB & 0x0f) == 0x04); //back (left) PB2 D51
-   // state = 12;
-  else if ((PINB & 0x0f) == 0x08) //PB3 D50
-    state = returnState;
+  // state = 12;
+  else if ((PINB & 0x09) == 0x08) //PB3 D50
+    state = 11;
 }
