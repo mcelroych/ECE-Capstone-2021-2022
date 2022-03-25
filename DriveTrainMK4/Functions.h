@@ -136,7 +136,6 @@ void turnAround() {
 
 //
 void turnLeft() {
-  cli();
   lMotor.brake();
   rMotor.initSpeed(maxSpeed);
 
@@ -144,14 +143,12 @@ void turnLeft() {
     getLine();
   while (rValue == 0x00)
     getLine();
-  while (lValue < 0x01)
+  while (lValue > 0x03)
     getLine();
-  sei();
 }
 
 //
 void turnRight() {
-  cli();
   rMotor.brake();
   lMotor.initSpeed(maxSpeed);
 
@@ -161,7 +158,6 @@ void turnRight() {
     getLine();
   while (rValue > 0x07)
     getLine();
-  sei();
 
 }
 
@@ -260,6 +256,7 @@ void nextState() {
       if (lineValue == 0x00) {
         state = 9;
         lastState = 8;
+        Pid.changeGain(2.00);
         PORTA ^= 0x03;
       }
 
@@ -268,9 +265,10 @@ void nextState() {
     case 9: // reverse State
 
       if (lineValue == 0xFF) {
-        PORTA ^= 0x03;
         state = 5;
         lastState = 9;
+        Pid.changeGain(1.00);
+        PORTA ^= 0x03;
       }
 
       break;

@@ -37,3 +37,9 @@ void PID::reset() {
   Integral = 0;
   pErr = 0;
 }
+
+void PID::changeGain(double _Kp, double _Ki = 0, double _Kd = 0) {
+  Kp = _Kp;
+  Ki = _Ki;
+  Kd = _Kd;
+}

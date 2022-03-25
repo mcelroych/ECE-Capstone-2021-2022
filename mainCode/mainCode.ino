@@ -77,6 +77,33 @@ void setup() {
   delay(500);
   lock();
   launcherArm();
+  armPrep();
+
+  digitalWrite(READY, HIGH);
+  delay(500);
+  digitalWrite(READY, LOW);
+
+  digitalWrite(DT_RESUME, HIGH);
+  delay(500);
+  digitalWrite(DT_RESUME, LOW);
+
+  while (!digitalRead(ARM_GRAB));
+  armGrabBead();
+
+  digitalWrite(READY, HIGH);
+  delay(500);
+  digitalWrite(READY, LOW);
+  
+  digitalWrite(DT_RESUME, HIGH);
+  delay(500);
+  digitalWrite(DT_RESUME, LOW);
+
+  while (!digitalRead(FIRE_PIN));
+  launcherFire();
+  delay(500);
+  lock();
+  launcherArm();
+  armPrep();
 
   digitalWrite(READY, HIGH);
   delay(500);

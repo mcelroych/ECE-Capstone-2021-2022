@@ -58,7 +58,7 @@ void startUp() {
   PORTL &= ~0x80; // Disable Pull-up Resistor
 
   // Initialize variables
-  state = 1;
+  state = 0;
   lastState = 0;
   inStart = true;
   IRvalue = 0;      
