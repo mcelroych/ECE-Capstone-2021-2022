@@ -50,7 +50,18 @@ void getDistance() {
 // Reads the compared results from the line sensor array
 // threshold is set by a potentiometer on the breakout board
 void getLine() {
-  lineValue = ~PINF;
+
+  uint8_t compValue = ~PINF;
+  uint8_t lineAverage = 0x00;
+
+  for (int i = 0; i < 3; i++) {
+    lineAverage ^= ~PINF;
+    delay(10);
+  }
+
+  if (compValue == lineAverage)
+    lineValue = lineAverage;
+
   rValue = lineValue & 0x0F;
   lValue = (lineValue >> 4) & 0x0F;
 }
@@ -105,18 +116,21 @@ void reverse() {
 // looks for the robot to be centered enough for the PID
 // to take over and stabalize
 void turnAround() {
-  cli();
+
+  lMotor.initSpeed(baseSpeed);
+  rMotor.initSpeed(baseSpeed);
+
   rMotor.changeDir();
 
-  delay(1000);
+  cli();
+
+  //delay(200);
   getLine();
-  while ((lValue & 0x08) != 0x08) {
+  while (lineValue > 0x00)
     getLine();
-    if ((lValue & 0x08) == 0x08) {
-      delay(50);
-      getLine();
-    }
-  }
+  while ((lValue & 0x01) != 0x01)
+    getLine();
+
   sei();
 }
 
@@ -130,7 +144,7 @@ void turnLeft() {
     getLine();
   while (rValue == 0x00)
     getLine();
-  while (lValue < 0x08)
+  while (lValue < 0x01)
     getLine();
   sei();
 }
@@ -145,7 +159,7 @@ void turnRight() {
     getLine();
   while (rValue == 0x00)
     getLine();
-  while (rValue < 0x08)
+  while (rValue > 0x07)
     getLine();
   sei();
 
@@ -175,7 +189,7 @@ void nextState() {
         inStart = false;
 
       if (inStart == false)
-        if ((rValue & 0x01) != 0x01) {
+        if ((rValue & 0x08) != 0x08) {
           state = 2;
           lastState = 1;
         }
@@ -216,21 +230,20 @@ void nextState() {
         rMotor.changeDir();
       }
 
-      else
+      else {
         state = 2;
+        rMotor.changeDir();
+      }
 
       lastState = 5;
 
       break;
 
     case 6: // back State
-      if ((lValue & 0x01) == 0x01) {
-        delay(80);
-        getLine();
-        if ((lValue & 0x01) == 0x01) {
-          state = 7;
-          lastState = 6;
-        }
+
+      if ((lValue & 0x08) == 0x08) {
+        state = 7;
+        lastState = 6;
       }
 
       break;
@@ -243,17 +256,18 @@ void nextState() {
       break;
 
     case 8: // end State
-      getLine();
-      if (lineValue == 0xFF) {
-        state = 5;
+
+      if (lineValue == 0x00) {
+        state = 9;
         lastState = 8;
+        PORTA ^= 0x03;
       }
 
       break;
 
     case 9: // reverse State
 
-      if ((lValue == 0x0F) && (rValue = 0x0F)) {
+      if (lineValue == 0xFF) {
         PORTA ^= 0x03;
         state = 5;
         lastState = 9;
@@ -266,9 +280,11 @@ void nextState() {
       break;
 
     case 11:
+
       lMotor.initSpeed(baseSpeed);
       rMotor.initSpeed(baseSpeed);
       state = returnState;
+
       break;
 
     default:

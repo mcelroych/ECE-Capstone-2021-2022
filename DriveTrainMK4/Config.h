@@ -20,7 +20,7 @@ bool inStart;
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01, minSpeed, baseSpeed, maxSpeed);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02, minSpeed, baseSpeed, maxSpeed);
-PID Pid = PID(0x00, 1.00, 2.00);
+PID Pid = PID(0x00, 1.00, 1.00);
 
 void startUp() {
   init();
