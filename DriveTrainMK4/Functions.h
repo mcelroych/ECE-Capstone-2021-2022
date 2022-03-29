@@ -28,7 +28,7 @@ void initISR() {
   PCMSK0 &= ~0xFF;
 
   PCICR |= 0x01;
-  PCMSK0 |= 0x0F;
+  PCMSK0 |= 0x09;
 }
 
 // Checks the compared results from the two distance sensors
@@ -122,16 +122,13 @@ void turnAround() {
 
   rMotor.changeDir();
 
-  cli();
-
-  //delay(200);
   getLine();
   while (lineValue > 0x00)
     getLine();
+  while (rValue < 0x07)
+    getLine();
   while ((lValue & 0x01) != 0x01)
     getLine();
-
-  sei();
 }
 
 //
@@ -156,7 +153,7 @@ void turnRight() {
     getLine();
   while (rValue == 0x00)
     getLine();
-  while (rValue > 0x07)
+  while (lValue < 0x01)
     getLine();
 
 }
@@ -237,7 +234,7 @@ void nextState() {
 
     case 6: // back State
 
-      if ((lValue & 0x08) == 0x08) {
+      if (lValue == 0x0F) {
         state = 7;
         lastState = 6;
       }
@@ -279,8 +276,7 @@ void nextState() {
 
     case 11:
 
-      lMotor.initSpeed(baseSpeed);
-      rMotor.initSpeed(baseSpeed);
+
       state = returnState;
 
       break;

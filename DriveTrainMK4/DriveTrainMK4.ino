@@ -23,7 +23,7 @@ int main(void) {
     switch (state) {
 
       case 0: // stall State
-
+        brake();
         break;
 
       case 1: // start State
@@ -68,6 +68,10 @@ int main(void) {
         brake();
         break;
 
+      case 11: // return State
+        lMotor.initSpeed(baseSpeed);
+        rMotor.initSpeed(baseSpeed);
+        break;
       default:
         state = 0;
         break;
@@ -79,12 +83,12 @@ int main(void) {
 
 //
 ISR(PCINT0_vect) {
-  if ((PINB & 0x09) == 0x01) // brake state PB0 D53
+  if ((PINB & 0x01) == 0x01) // brake state PB0 D53
     state = 10;
   //else if ((PINB & 0x0f) == 0x02); // front PB1 D52
   // state = 11;
   //else if ((PINB & 0x0f) == 0x04); //back (left) PB2 D51
   // state = 12;
-  else if ((PINB & 0x09) == 0x08) //PB3 D50
+  else if ((PINB & 0x08) == 0x08) //PB3 D50
     state = 11;
 }

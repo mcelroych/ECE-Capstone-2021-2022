@@ -56,11 +56,13 @@ void setup() {
   pinMode(DT_RESUME, OUTPUT);
   digitalWrite(DT_RESUME, LOW);
   while (!digitalRead(START_BTN));
-
+  
+  //setup**************************
   launcherArm();
   armPrep();
   digitalWrite(DT_ENABLE, HIGH);
 
+  //grab beads one*****************
   while (!digitalRead(ARM_GRAB));
   armGrabBead();
 
@@ -72,45 +74,40 @@ void setup() {
   delay(500);
   digitalWrite(DT_RESUME, LOW);
 
+  //Fire One***********************
   while (!digitalRead(FIRE_PIN));
   launcherFire();
   delay(500);
-  lock();
   launcherArm();
   armPrep();
 
   digitalWrite(READY, HIGH);
-  delay(500);
-  digitalWrite(READY, LOW);
-
   digitalWrite(DT_RESUME, HIGH);
   delay(500);
-  digitalWrite(DT_RESUME, LOW);
+  digitalWrite(READY, LOW);
+  digitalWrite(DT_RESUME, LOW);  
 
+  //grab beads TWO*****************
   while (!digitalRead(ARM_GRAB));
   armGrabBead();
 
   digitalWrite(READY, HIGH);
-  delay(500);
-  digitalWrite(READY, LOW);
-  
   digitalWrite(DT_RESUME, HIGH);
   delay(500);
+  digitalWrite(READY, LOW);
   digitalWrite(DT_RESUME, LOW);
 
+  //Fire Two***********************
   while (!digitalRead(FIRE_PIN));
   launcherFire();
   delay(500);
-  lock();
   launcherArm();
   armPrep();
 
   digitalWrite(READY, HIGH);
-  delay(500);
-  digitalWrite(READY, LOW);
-
   digitalWrite(DT_RESUME, HIGH);
   delay(500);
+  digitalWrite(READY, LOW);
   digitalWrite(DT_RESUME, LOW);
   
 }

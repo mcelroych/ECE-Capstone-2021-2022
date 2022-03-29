@@ -11,16 +11,16 @@
 uint8_t lValue,rValue, lineValue;
 int IRvalue;
 bool turnCond;
-uint8_t minSpeed = 0x30;
-uint8_t baseSpeed = 0x3A;
-uint8_t maxSpeed = 0x44;
+uint8_t minSpeed = 0x35;
+uint8_t baseSpeed = 0x3F;
+uint8_t maxSpeed = 0x49;
 int state, lastState, returnState;
 bool inStart;
 
 // Initialization of class objects
 Motor lMotor = Motor(&OCR1A, &PORTA, 0x01, minSpeed, baseSpeed, maxSpeed);
 Motor rMotor = Motor(&OCR1B, &PORTA, 0x02, minSpeed, baseSpeed, maxSpeed);
-PID Pid = PID(0x00, 1.00, 1.00);
+PID Pid = PID(0x00, 2.00, 1.00);
 
 void startUp() {
   init();
