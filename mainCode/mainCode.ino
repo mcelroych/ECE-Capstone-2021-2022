@@ -36,7 +36,7 @@ Servo launcherServo;  // create servo object to control a servo
 #define ARM_GRAB  31
 #define READY     32
 #define START_BTN 52
-#define DT_ENABLE 55
+#define DT_ENABLE 47
 #define DT_RESUME 49
 
 volatile int encoderValue = 0;

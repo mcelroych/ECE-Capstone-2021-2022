@@ -12,14 +12,12 @@ int main(void) {
   initISR();
 
   sei();
-  /*while(1) {
-    getLine();
-    Serial.print(lValue);
-    Serial.print(" ");
-    Serial.println(rValue);
-    }*/
+
   // Infinite Loop
   for (;;) {
+    Serial.print(state);
+    Serial.print(" ");
+    Serial.println(returnState);
     switch (state) {
 
       case 0: // stall State
@@ -72,6 +70,15 @@ int main(void) {
         lMotor.initSpeed(baseSpeed);
         rMotor.initSpeed(baseSpeed);
         break;
+
+      case 12: // Delay State
+
+        brake();
+
+        delay(1000);
+        
+        break;
+
       default:
         state = 0;
         break;
@@ -85,10 +92,6 @@ int main(void) {
 ISR(PCINT0_vect) {
   if ((PINB & 0x01) == 0x01) // brake state PB0 D53
     state = 10;
-  //else if ((PINB & 0x0f) == 0x02); // front PB1 D52
-  // state = 11;
-  //else if ((PINB & 0x0f) == 0x04); //back (left) PB2 D51
-  // state = 12;
   else if ((PINB & 0x08) == 0x08) //PB3 D50
     state = 11;
 }

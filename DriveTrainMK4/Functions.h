@@ -83,6 +83,7 @@ void trackLine() {
     rMotor.initSpeed(baseSpeed + diff);
     lMotor.initSpeed(baseSpeed - diff);
   }
+ 
 }
 
 
@@ -100,13 +101,15 @@ void reverse() {
     int diff = Pid.controlFunc(lValue - rValue);
 
     if (diff > 0) {
-      lMotor.initSpeed(baseSpeed + diff);
-      rMotor.initSpeed(baseSpeed - diff);
+      lSpeed += diff;
+      rSpeed -= diff;
     }
     else if (diff < 0) {
-      rMotor.initSpeed(baseSpeed + diff);
-      lMotor.initSpeed(baseSpeed - diff);
+      rSpeed += diff;
+      lSpeed -= diff;
     }
+    rMotor.initSpeed(rSpeed);
+    lMotor.initSpeed(lSpeed);
   }
 }
 
@@ -136,9 +139,9 @@ void turnLeft() {
   lMotor.brake();
   rMotor.initSpeed(maxSpeed);
 
-  while (rValue != 0x00)
+  while (lValue > 0x00)
     getLine();
-  while (rValue == 0x00)
+  while (lValue == 0x00)
     getLine();
   while (lValue > 0x03)
     getLine();
@@ -209,7 +212,7 @@ void nextState() {
     case 4: // down State
 
       if (turnCond == true) {
-        state = 5;
+        state = 12;
         lastState = 4;
       }
 
@@ -219,7 +222,7 @@ void nextState() {
 
       if (lastState == 4) {
 
-        state = 6;
+        state = 12;
         rMotor.changeDir();
       }
 
@@ -275,9 +278,23 @@ void nextState() {
       break;
 
     case 11:
+    
+      if(lastState == 4)
+        state = 5;
+        
+      else
+        state = returnState;
+      
+      break;
 
+    case 12:
+      if (lastState == 4)
+        state = 5;
 
-      state = returnState;
+      if (lastState == 5)
+        state = 6;
+
+      returnState = state;
 
       break;
 

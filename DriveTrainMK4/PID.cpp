@@ -2,8 +2,8 @@
 
 
 // Constructors
-PID::PID(uint8_t _Sp, double _Dt, double _Kp, double _Ki, double _Kd):
-  Sp(_Sp), Dt(_Dt), Integral(0), pErr(0), Kp(_Kp), Ki(_Ki), Kd(_Kd)
+PID::PID(uint8_t _Sp, double _Kp, double _Ki, double _Kd):
+  Sp(_Sp), Integral(0), pErr(0), Kp(_Kp), Ki(_Ki), Kd(_Kd)
 {
   // intentionally blank
 }
@@ -17,11 +17,11 @@ double PID::controlFunc(uint8_t Pv) {
   double Pp = Kp * Err;
 
   // Calculate Integral term
-  Integral += Err * Dt;
+  Integral += Err;
   double Ip = Ki * Integral;
 
   // Calculate Derivative term
-  double Derivative = (Err - pErr) / Dt;
+  double Derivative = Err - pErr;
   double Dp = Kd * Derivative;
 
   // Sum the individual terms
@@ -33,12 +33,12 @@ double PID::controlFunc(uint8_t Pv) {
   return Ut;
 }
 
-void PID::reset() {
+void PID::dump() {
   Integral = 0;
   pErr = 0;
 }
 
-void PID::changeGain(double _Kp, double _Ki = 0, double _Kd = 0) {
+void PID::changeGain(double _Kp = 0, double _Ki = 0, double _Kd = 0) {
   Kp = _Kp;
   Ki = _Ki;
   Kd = _Kd;
