@@ -83,7 +83,7 @@ void trackLine() {
     rMotor.initSpeed(baseSpeed + diff);
     lMotor.initSpeed(baseSpeed - diff);
   }
- 
+
 }
 
 
@@ -145,6 +145,8 @@ void turnLeft() {
     getLine();
   while (lValue > 0x03)
     getLine();
+  while (rValue < 0x01)
+    getLine();
 }
 
 //
@@ -152,9 +154,11 @@ void turnRight() {
   rMotor.brake();
   lMotor.initSpeed(maxSpeed);
 
-  while (rValue != 0x00)
+  while (rValue > 0x00)
     getLine();
   while (rValue == 0x00)
+    getLine();
+  while (rValue > 0x03)
     getLine();
   while (lValue < 0x01)
     getLine();
@@ -233,6 +237,7 @@ void nextState() {
 
       lastState = 5;
 
+
       break;
 
     case 6: // back State
@@ -277,22 +282,29 @@ void nextState() {
 
       break;
 
-    case 11:
-    
-      if(lastState == 4)
-        state = 5;
-        
-      else
-        state = returnState;
-      
-      break;
+    case 11: // return State
 
-    case 12:
       if (lastState == 4)
         state = 5;
 
-      if (lastState == 5)
-        state = 6;
+      else
+        state = returnState;
+
+      break;
+
+    case 12:
+
+      if (lastState == 4)
+        state = 5;
+
+      if (lastState == 5) {
+
+        if ((PINK & 0x03) == 0x00)
+          state = 6;
+
+        else
+          state = 5;
+      }
 
       returnState = state;
 
